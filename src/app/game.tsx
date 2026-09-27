@@ -145,7 +145,7 @@ export default function GameScreen() {
           </View>
         )}
 
-        <View style={[styles.actions, paused && styles.dimmed]} pointerEvents={paused ? 'none' : 'auto'}>
+        <View style={[styles.actions, paused && styles.dimmed, paused && styles.blocked]}>
           <Pressable accessibilityRole="button" onPress={() => markAnswer(true)} style={styles.correct}>
             <Text style={styles.actionDark}>Doğru</Text>
           </Pressable>
@@ -270,6 +270,9 @@ const styles = StyleSheet.create({
   },
   dimmed: {
     opacity: 0.35,
+  },
+  blocked: {
+    pointerEvents: 'none',
   },
   question: {
     color: colors.white,

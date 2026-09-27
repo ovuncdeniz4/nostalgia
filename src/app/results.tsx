@@ -67,13 +67,17 @@ export default function ResultsScreen() {
         ) : null}
         <View style={styles.board}>
           <Text style={styles.boardTitle}>Son Puanlar</Text>
-          {rows.map((row, index) => (
-            <View key={row.id} style={[styles.row, index === 0 && styles.rowFirst]}>
-              <Text style={[styles.place, index === 0 && styles.nameFirst]}>{index + 1}</Text>
-              <Text style={[styles.name, index === 0 && styles.nameFirst]}>{row.name}</Text>
-              <Text style={[styles.score, index === 0 && styles.nameFirst]}>{row.score}</Text>
-            </View>
-          ))}
+          {rows.map((row, index) => {
+            const leading = index === 0;
+            const ink = leading ? colors.black : colors.white;
+            return (
+              <View key={row.id} style={[styles.row, leading && styles.rowFirst]}>
+                <Text style={[styles.place, { color: ink }]}>{index + 1}</Text>
+                <Text style={[styles.name, { color: ink }]}>{row.name}</Text>
+                <Text style={[styles.score, { color: ink }]}>{row.score}</Text>
+              </View>
+            );
+          })}
         </View>
         <Pressable accessibilityRole="button" onPress={replay} style={styles.replay}>
           <Text style={styles.replayText}>Tekrar Oyna</Text>
@@ -153,9 +157,6 @@ const styles = StyleSheet.create({
     color: colors.white,
     fontFamily: font.display,
     fontSize: 20,
-  },
-  nameFirst: {
-    color: colors.black,
   },
   score: {
     color: colors.turquoise,
