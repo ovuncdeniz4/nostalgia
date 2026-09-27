@@ -7,7 +7,7 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Bounce, FadeScale, PopIn, PressScale, Pulse, ShimmerBar } from '@/components/motion';
 import { NeonText } from '@/components/neon-text';
-import { ScreenFrame } from '@/components/screen-frame';
+import { ScreenFrame, webScrollStyle } from '@/components/screen-frame';
 import { PARTY_ROUNDS_PER_TEAM, scoreRows } from '@/game/engine';
 import { useSession } from '@/game/session';
 import { saveLastResult } from '@/storage/prefs';
@@ -104,7 +104,7 @@ export default function GameScreen() {
         </Pressable>
       </View>
 
-      <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
+      <ScrollView style={webScrollStyle} contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
         {config.mode === 'party' && team ? (
           <LinearGradient colors={palette.colors} style={styles.teamBanner}>
             <ShimmerBar />

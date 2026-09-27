@@ -4,6 +4,7 @@ import { Anton_400Regular, useFonts } from '@expo-google-fonts/anton';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
+import { Platform } from 'react-native';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { colors } from '@/theme/tokens';
@@ -32,6 +33,7 @@ export default function RootLayout() {
           animation: 'slide_from_right',
           animationDuration: 320,
           contentStyle: { backgroundColor: colors.bg0 },
+          gestureEnabled: Platform.OS !== 'web',
         }}
       />
     </SafeAreaProvider>

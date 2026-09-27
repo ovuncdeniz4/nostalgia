@@ -13,6 +13,17 @@ interface ScreenFrameProps {
   tone?: 'welcome' | 'play' | 'results';
 }
 
+// Keep vertical lists from panning sideways. overflow-x:clip cannot pair with overflow-y:auto
+// (it computes back to hidden), so block horizontal gestures and drop the translateZ scroll layer.
+export const webScrollStyle: ViewStyle | null =
+  Platform.OS === 'web'
+    ? ({
+        touchAction: 'pan-y',
+        overscrollBehaviorX: 'none',
+        transform: 'none',
+      } as unknown as ViewStyle)
+    : null;
+
 export function ScreenFrame({ children, tone = 'play' }: ScreenFrameProps) {
   return (
     <View style={styles.root}>

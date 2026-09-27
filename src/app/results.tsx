@@ -6,7 +6,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Bounce, FadeScale, GlowButton } from '@/components/motion';
 import { NeonText } from '@/components/neon-text';
-import { ScreenFrame } from '@/components/screen-frame';
+import { ScreenFrame, webScrollStyle } from '@/components/screen-frame';
 import { scoreRows, type ScoreRow } from '@/game/engine';
 import { useSession } from '@/game/session';
 import { loadLastResult, type StoredResult } from '@/storage/prefs';
@@ -55,7 +55,7 @@ export default function ResultsScreen() {
 
   return (
     <ScreenFrame tone="results">
-      <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
+      <ScrollView style={webScrollStyle} contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
         <FadeScale>
           <NeonText size={48} color={colors.magenta} gradient={[colors.magenta, colors.turquoise, colors.yellow]}>
             Oyun Bitti
