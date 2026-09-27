@@ -35,7 +35,7 @@ export const categories: Category[] = [
     title: 'Çocukluk Oyuncakları',
     emoji: '🧸',
     description:
-      'Tamagotchi, Beanie Babies ve Pokémon kartlarını hatırlıyor musun? Çocukluğumuzu büyülü kılan oyuncakların dünyasına dal.',
+      'Tamagotchi, Taso ve Pokémon kartlarını hatırlıyor musun? Çocukluğumuzu büyüten oyuncakların dünyasına dal.',
     image: require('../../assets/images/categories/toys.jpg'),
     locked: false,
   },

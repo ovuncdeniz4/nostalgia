@@ -21,7 +21,7 @@ export default function WelcomeScreen() {
               color={colors.turquoise}
               gradient={[colors.magenta, colors.turquoise, colors.yellow]}
             >
-              90's & 2000's
+              90'lar ve 2000'ler
             </NeonText>
             <NeonText size={64} color={colors.yellow} gradient={[colors.yellow, colors.pink, colors.purple]}>
               Nostalgia
