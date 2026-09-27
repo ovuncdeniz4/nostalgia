@@ -11,6 +11,7 @@ import { colors, layout } from '@/theme/tokens';
 interface ScreenFrameProps {
   children: ReactNode;
   tone?: 'welcome' | 'play' | 'results';
+  stars?: boolean;
 }
 
 // Keep vertical lists from panning sideways. overflow-x:clip cannot pair with overflow-y:auto
@@ -26,11 +27,11 @@ export const webScrollStyle: ViewStyle | null =
     : null;
 
 // The frame fills the navigator card. Pinning it to the viewport made the whole screen slide on tap.
-export function ScreenFrame({ children, tone = 'play' }: ScreenFrameProps) {
+export function ScreenFrame({ children, tone = 'play', stars = true }: ScreenFrameProps) {
   return (
     <View style={styles.root}>
       <LinearGradient colors={[colors.bg0, colors.bg1, colors.bg2]} style={StyleSheet.absoluteFill} />
-      <RetroAtmosphere tone={tone} />
+      <RetroAtmosphere tone={tone} stars={stars} />
       <SafeAreaView style={styles.safe}>
         <View style={styles.column}>{children}</View>
       </SafeAreaView>
