@@ -100,7 +100,7 @@ function PulseStar({ style, color, delay }: { style: ViewStyle; color: string; d
   return <Animated.Text style={[styles.star, { color }, style as never, animated]}>★</Animated.Text>;
 }
 
-export function RetroAtmosphere({ tone = 'play' }: { tone?: AtmosphereTone }) {
+export function RetroAtmosphere({ tone = 'play', stars = true }: { tone?: AtmosphereTone; stars?: boolean }) {
   const orbs: {
     color: string;
     delay: number;
@@ -131,7 +131,7 @@ export function RetroAtmosphere({ tone = 'play' }: { tone?: AtmosphereTone }) {
       {orbs.map((orb) => (
         <PulseOrb key={`${orb.color}-${orb.delay}`} {...orb} />
       ))}
-      {tone !== 'results' ? (
+      {stars && tone !== 'results' ? (
         <>
           <PulseStar style={{ top: 120, left: 36 }} color={colors.yellow} delay={200} />
           <PulseStar style={{ top: 180, right: 48 }} color={colors.pink} delay={800} />

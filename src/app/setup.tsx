@@ -24,11 +24,11 @@ import { colors, font } from '@/theme/tokens';
 
 const webClip = Platform.OS === 'web' ? ({ overflow: 'clip' } as unknown as ViewStyle) : null;
 
-const difficulties: { id: Difficulty; label: string; fill?: string; gradient?: readonly [string, string]; ink: string; mark: string }[] = [
-  { id: 'easy', label: 'Kolay', fill: colors.yellow, ink: colors.black, mark: '⭐' },
-  { id: 'medium', label: 'Orta', fill: colors.orange, ink: colors.black, mark: '⭐⭐' },
-  { id: 'hard', label: 'Zor', fill: colors.hard, ink: colors.white, mark: '⭐⭐⭐' },
-  { id: 'random', label: 'Rastgele', gradient: [colors.purple, colors.pink], ink: colors.white, mark: '🎲' },
+const difficulties: { id: Difficulty; label: string; accent: string; mark: string }[] = [
+  { id: 'easy', label: 'Kolay', accent: colors.yellow, mark: '⭐' },
+  { id: 'medium', label: 'Orta', accent: colors.orange, mark: '⭐⭐' },
+  { id: 'hard', label: 'Zor', accent: colors.hard, mark: '⭐⭐⭐' },
+  { id: 'random', label: 'Rastgele', accent: colors.purple, mark: '🎲' },
 ];
 
 export default function SetupScreen() {
@@ -128,7 +128,7 @@ export default function SetupScreen() {
   };
 
   return (
-    <ScreenFrame>
+    <ScreenFrame stars={false}>
       <Pressable accessibilityRole="button" accessibilityLabel="Geri" onPress={() => router.back()} style={styles.back}>
         <Text style={styles.backArrow}>←</Text>
       </Pressable>
@@ -227,76 +227,83 @@ export default function SetupScreen() {
           open={settingsOpen}
           onPress={() => setSettingsOpen((open) => !open)}
         >
-          <View style={styles.sectionRow}>
-            <IconBadge glyph="⚡" gradient={[colors.orange, colors.yellow]} />
-            <Text style={styles.sectionTitle}>Zorluk</Text>
-          </View>
-          <View style={styles.panel}>
-            <View style={styles.row}>
-              {difficulties.slice(0, 2).map((item) => (
-                <Choice
-                  key={item.id}
-                  label={item.label}
-                  mark={item.mark}
-                  selected={difficulty === item.id}
-                  fill={item.fill}
-                  gradient={item.gradient}
-                  ink={item.ink}
-                  onPress={() => setDifficulty(item.id)}
-                />
-              ))}
+          <View style={styles.settingsStack}>
+            <View style={styles.settingsGroup}>
+              <View style={styles.sectionRow}>
+                <IconBadge glyph="⚡" gradient={[colors.orange, colors.yellow]} />
+                <Text style={styles.sectionTitle}>Zorluk</Text>
+              </View>
+              <View style={styles.panel}>
+                <View style={styles.row}>
+                  {difficulties.slice(0, 2).map((item) => (
+                    <Choice
+                      key={item.id}
+                      label={item.label}
+                      mark={item.mark}
+                      selected={difficulty === item.id}
+                      calm
+                      accent={item.accent}
+                      onPress={() => setDifficulty(item.id)}
+                    />
+                  ))}
+                </View>
+                <View style={styles.row}>
+                  {difficulties.slice(2).map((item) => (
+                    <Choice
+                      key={item.id}
+                      label={item.label}
+                      mark={item.mark}
+                      selected={difficulty === item.id}
+                      calm
+                      accent={item.accent}
+                      onPress={() => setDifficulty(item.id)}
+                    />
+                  ))}
+                </View>
+              </View>
             </View>
-            <View style={styles.row}>
-              {difficulties.slice(2).map((item) => (
-                <Choice
-                  key={item.id}
-                  label={item.label}
-                  mark={item.mark}
-                  selected={difficulty === item.id}
-                  fill={item.fill}
-                  gradient={item.gradient}
-                  ink={item.ink}
-                  onPress={() => setDifficulty(item.id)}
-                />
-              ))}
-            </View>
-          </View>
 
-          <View style={styles.sectionRow}>
-            <IconBadge glyph="⏱" gradient={[colors.pink, colors.purple]} ink={colors.white} />
-            <Text style={styles.sectionTitle}>Tur Süresi</Text>
-          </View>
-          <View style={styles.panel}>
-            <View style={styles.row}>
-              {TIMER_OPTIONS.slice(0, 3).map((seconds) => (
-                <Choice
-                  key={seconds}
-                  label={`${seconds}s`}
-                  selected={roundTimer === seconds}
-                  gradient={[colors.lime, colors.turquoise]}
-                  onPress={() => setRoundTimer(seconds)}
-                />
-              ))}
+            <View style={styles.settingsGroup}>
+              <View style={styles.sectionRow}>
+                <IconBadge glyph="⏱" gradient={[colors.pink, colors.purple]} ink={colors.white} />
+                <Text style={styles.sectionTitle}>Tur Süresi</Text>
+              </View>
+              <View style={styles.panel}>
+                <View style={styles.row}>
+                  {TIMER_OPTIONS.slice(0, 3).map((seconds) => (
+                    <Choice
+                      key={seconds}
+                      label={`${seconds}s`}
+                      selected={roundTimer === seconds}
+                      calm
+                      accent={colors.turquoise}
+                      onPress={() => setRoundTimer(seconds)}
+                    />
+                  ))}
+                </View>
+                <View style={styles.row}>
+                  {TIMER_OPTIONS.slice(3).map((seconds) => (
+                    <Choice
+                      key={seconds}
+                      label={`${seconds}s`}
+                      selected={roundTimer === seconds}
+                      calm
+                      accent={colors.turquoise}
+                      onPress={() => setRoundTimer(seconds)}
+                    />
+                  ))}
+                  <View style={styles.choiceSlot} />
+                </View>
+              </View>
             </View>
-            <View style={styles.row}>
-              {TIMER_OPTIONS.slice(3).map((seconds) => (
-                <Choice
-                  key={seconds}
-                  label={`${seconds}s`}
-                  selected={roundTimer === seconds}
-                  gradient={[colors.lime, colors.turquoise]}
-                  onPress={() => setRoundTimer(seconds)}
-                />
-              ))}
-            </View>
-          </View>
 
-          <View style={styles.sectionRow}>
-            <IconBadge glyph="⏭" gradient={[colors.lime, colors.turquoise]} />
-            <Text style={styles.sectionTitle}>Pas Sayısı</Text>
-          </View>
-          <View style={styles.panel}>
-            <PassSlider value={passCount} onChange={setPassCount} />
+            <View style={styles.passGroup}>
+              <View style={styles.sectionRow}>
+                <IconBadge glyph="⏭" gradient={[colors.turquoise, colors.blue]} />
+                <Text style={styles.sectionTitle}>Pas Sayısı</Text>
+              </View>
+              <PassSlider value={passCount} onChange={setPassCount} />
+            </View>
           </View>
         </Fold>
 
@@ -328,8 +335,9 @@ function PassSlider({ value, onChange }: { value: number; onChange: (next: numbe
   const [width, setWidth] = useState(0);
   const span = PASS_MAX - PASS_MIN;
   const ratio = (value - PASS_MIN) / span;
-  const thumb = 28;
+  const thumb = 36;
   const left = width === 0 ? 0 : ratio * Math.max(0, width - thumb);
+  const ticks = [1, 5, 10];
 
   const pick = (x: number) => {
     if (width <= 0) {
@@ -353,20 +361,25 @@ function PassSlider({ value, onChange }: { value: number; onChange: (next: numbe
         style={styles.sliderHit}
       >
         <View style={styles.sliderTrack}>
-          <LinearGradient
-            colors={[colors.lime, colors.turquoise]}
-            start={{ x: 0, y: 0 }}
-            end={{ x: 1, y: 0 }}
-            style={[styles.sliderFill, { width: left + thumb / 2 }]}
-          />
+          <View style={[styles.sliderFill, { width: left + thumb / 2 }]} />
         </View>
-        <LinearGradient colors={[colors.lime, colors.turquoise]} style={[styles.sliderThumb, { left }]} />
+        <View style={[styles.sliderThumb, { left }]}>
+          <Text style={styles.sliderValue}>{value}</Text>
+        </View>
       </View>
-      <View style={styles.passScale}>
-        <Text style={styles.passScaleText}>1</Text>
-        <Text style={styles.passScaleText}>5</Text>
-        <Text style={styles.passScaleText}>10</Text>
-      </View>
+      {width > 0 ? (
+        <View style={styles.passScale}>
+          {ticks.map((tick) => {
+            const tickRatio = (tick - PASS_MIN) / span;
+            const center = tickRatio * Math.max(0, width - thumb) + thumb / 2;
+            return (
+              <Text key={tick} style={[styles.passScaleText, { left: center }]}>
+                {tick}
+              </Text>
+            );
+          })}
+        </View>
+      ) : null}
     </View>
   );
 }
@@ -418,15 +431,22 @@ function Fold({
 }) {
   return (
     <View style={styles.block}>
-      <Pressable accessibilityRole="button" onPress={onPress} style={styles.fold}>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityState={{ expanded: open }}
+        onPress={onPress}
+        style={styles.fold}
+      >
         <View style={styles.foldMain}>
           <IconBadge glyph={glyph} gradient={gradient} ink={ink} />
           <View style={styles.foldCopy}>
             <Text style={styles.sectionTitle}>{title}</Text>
-            <Text style={styles.foldSub}>{subtitle}</Text>
+            {open ? null : <Text style={styles.foldSub}>{subtitle}</Text>}
           </View>
         </View>
-        <Text style={[styles.chevron, open && styles.chevronOpen]}>⌄</Text>
+        <View style={styles.chevronHit}>
+          <Text style={styles.chevron}>{open ? '⌃' : '⌄'}</Text>
+        </View>
       </Pressable>
       {open ? <View>{children}</View> : null}
     </View>
@@ -442,6 +462,8 @@ function Choice({
   gradient,
   fill,
   ink = colors.black,
+  calm = false,
+  accent,
 }: {
   label: string;
   icon?: string;
@@ -451,13 +473,20 @@ function Choice({
   gradient?: readonly [string, string];
   fill?: string;
   ink?: string;
+  calm?: boolean;
+  accent?: string;
 }) {
-  const color = selected ? ink : colors.white;
+  const calmSelected = Boolean(calm && selected && accent);
+  const color = calmSelected && accent ? accent : selected ? ink : colors.white;
   const body = (
     <View style={styles.choiceBody}>
       {icon ? <Text style={styles.choiceIcon}>{icon}</Text> : null}
       <Text style={[styles.choiceText, { color }]}>{label}</Text>
-      {mark ? <Text style={[styles.choiceMark, !selected && styles.markHidden]}>{mark}</Text> : null}
+      {mark ? (
+        <Text style={[styles.choiceMark, calmSelected ? { color: accent } : null, !selected && styles.markHidden]}>
+          {mark}
+        </Text>
+      ) : null}
     </View>
   );
 
@@ -466,16 +495,21 @@ function Choice({
       <Pressable
         accessibilityRole="button"
         onPress={onPress}
-        style={[styles.choice, selected && styles.choiceOn, webClip]}
+        style={[
+          styles.choice,
+          selected && !calmSelected && styles.choiceOn,
+          calmSelected && accent ? { borderColor: accent, backgroundColor: `${accent}33` } : null,
+          webClip,
+        ]}
       >
-        {selected && gradient ? (
+        {selected && gradient && !calm ? (
           <LinearGradient colors={gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.choiceFill}>
             <ShimmerBar />
             {body}
           </LinearGradient>
         ) : (
-          <View style={[styles.choiceFill, selected && fill ? { backgroundColor: fill } : null]}>
-            {selected ? <ShimmerBar /> : null}
+          <View style={[styles.choiceFill, selected && fill && !calm ? { backgroundColor: fill } : null]}>
+            {selected && !calm ? <ShimmerBar /> : null}
             {body}
           </View>
         )}
@@ -635,18 +669,34 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   foldSub: {
-    color: colors.textMuted,
-    fontSize: 11,
-    letterSpacing: 0.6,
-    textTransform: 'uppercase',
+    color: 'rgba(255,255,255,0.9)',
+    fontSize: 14,
+    letterSpacing: 0.4,
+  },
+  chevronHit: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.18)',
   },
   chevron: {
-    color: colors.turquoise,
-    fontSize: 28,
-    lineHeight: 28,
+    color: colors.white,
+    fontSize: 20,
+    lineHeight: 22,
   },
-  chevronOpen: {
-    transform: [{ rotate: '180deg' }],
+  settingsStack: {
+    gap: 22,
+  },
+  settingsGroup: {
+    gap: 10,
+  },
+  passGroup: {
+    gap: 12,
+    marginTop: 4,
   },
   teamCard: {
     flexDirection: 'row',
@@ -705,7 +755,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   sliderHit: {
-    height: 36,
+    height: 48,
     justifyContent: 'center',
   },
   sliderTrack: {
@@ -717,23 +767,36 @@ const styles = StyleSheet.create({
   sliderFill: {
     height: 8,
     borderRadius: 8,
+    backgroundColor: colors.turquoise,
   },
   sliderThumb: {
     position: 'absolute',
-    top: 4,
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    top: 6,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
     borderWidth: 3,
     borderColor: colors.white,
+    backgroundColor: colors.turquoise,
+  },
+  sliderValue: {
+    color: colors.white,
+    fontFamily: font.display,
+    fontSize: 14,
+    lineHeight: 16,
   },
   passScale: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 8,
+    height: 18,
+    position: 'relative',
   },
   passScaleText: {
-    color: colors.textMuted,
+    position: 'absolute',
+    width: 24,
+    marginLeft: -12,
+    textAlign: 'center',
+    color: 'rgba(255,255,255,0.75)',
     fontSize: 12,
   },
   primary: {
