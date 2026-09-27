@@ -3,7 +3,9 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 
+import { FadeScale, GlowButton, Pulse, ShimmerBar } from '@/components/motion';
 import { NeonText } from '@/components/neon-text';
 import { ScreenFrame } from '@/components/screen-frame';
 import { findCategory } from '@/data/categories';
@@ -136,17 +138,28 @@ export default function SetupScreen() {
       <ScrollView style={styles.scroll} contentContainerStyle={styles.form} showsVerticalScrollIndicator={false}>
         <Text style={styles.section}>Oyun Modu</Text>
         <View style={styles.row}>
-          <Choice label="Tek Kişi" selected={mode === 'solo'} onPress={() => setMode('solo')} />
-          <Choice label="Grup" selected={mode === 'party'} onPress={() => setMode('party')} />
+          <Choice
+            label="Tek Kişi"
+            selected={mode === 'solo'}
+            gradient={[colors.turquoise, colors.blue]}
+            onPress={() => setMode('solo')}
+          />
+          <Choice
+            label="Grup"
+            selected={mode === 'party'}
+            gradient={[colors.magenta, colors.purple]}
+            onPress={() => setMode('party')}
+          />
         </View>
 
         {mode === 'party' ? (
           <View style={styles.block}>
-            <Pressable onPress={() => setTeamsOpen((open) => !open)}>
+            <Pressable accessibilityRole="button" onPress={() => setTeamsOpen((open) => !open)}>
               <Text style={styles.section}>Takımları Ayarla {teamsOpen ? '−' : '+'}</Text>
             </Pressable>
-            {teamsOpen
-              ? teams.map((team, index) => (
+            {teamsOpen ? (
+              <FadeScale>
+                {teams.map((team, index) => (
                   <View key={team.id} style={styles.teamRow}>
                     <Text style={styles.teamIndex}>{index + 1}</Text>
                     <TextInput
@@ -162,8 +175,9 @@ export default function SetupScreen() {
                       </Pressable>
                     ) : null}
                   </View>
-                ))
-              : null}
+                ))}
+              </FadeScale>
+            ) : null}
             {teamsOpen && teams.length < 6 ? (
               <Pressable accessibilityRole="button" onPress={addTeam} style={styles.secondary}>
                 <Text style={styles.secondaryText}>Takım Ekle</Text>
@@ -175,12 +189,13 @@ export default function SetupScreen() {
           </View>
         ) : null}
 
-        <Pressable onPress={() => setSettingsOpen((open) => !open)}>
+        <Pressable accessibilityRole="button" onPress={() => setSettingsOpen((open) => !open)}>
           <Text style={styles.section}>
             Ayarlar {settingsOpen ? '−' : '+'} · {roundTimer}s · {passCount} pas
           </Text>
         </Pressable>
         {settingsOpen ? (
+          <FadeScale>
           <View style={styles.block}>
             <Text style={styles.label}>Zorluk</Text>
             <View style={styles.row}>
@@ -243,18 +258,26 @@ export default function SetupScreen() {
               </Pressable>
             </View>
           </View>
+          </FadeScale>
         ) : null}
-        <Pressable
-          accessibilityRole="button"
+        <GlowButton
+          label={countdown !== null && countdown > 0 ? `${countdown}... içinde başlıyor` : 'Oyunu Başlat'}
           disabled={!ready}
           onPress={() => setCountdown(3)}
-          style={[styles.primary, !ready && styles.disabled]}
-        >
-          <Text style={styles.primaryText}>
-            {countdown !== null && countdown > 0 ? `${countdown}... içinde başlıyor` : 'Oyunu Başlat'}
-          </Text>
-        </Pressable>
+          gradient={ready ? [colors.lime, colors.turquoise] : [colors.cardStrong, colors.cardStrong]}
+          textColor={ready ? colors.black : colors.textMuted}
+          style={styles.start}
+        />
       </ScrollView>
+      {countdown !== null && countdown > 0 ? (
+        <View style={styles.countdown}>
+          <Pulse key={countdown}>
+            <NeonText size={96} color={colors.yellow} gradient={[colors.yellow, colors.pink, colors.turquoise]}>
+              {String(countdown)}
+            </NeonText>
+          </Pulse>
+        </View>
+      ) : null}
     </ScreenFrame>
   );
 }
@@ -263,19 +286,29 @@ function Choice({
   label,
   selected,
   onPress,
+  gradient = [colors.turquoise, colors.blue],
 }: {
   label: string;
   selected: boolean;
   onPress: () => void;
+  gradient?: readonly [string, string];
 }) {
+  const labelNode = <Text style={[styles.choiceText, selected && styles.choiceTextOn]}>{label}</Text>;
   return (
-    <Pressable
-      accessibilityRole="button"
-      onPress={onPress}
-      style={[styles.choice, selected && styles.choiceOn]}
-    >
-      <Text style={[styles.choiceText, selected && styles.choiceTextOn]}>{label}</Text>
-    </Pressable>
+    <View style={styles.choiceSlot}>
+      {selected ? (
+        <Pressable accessibilityRole="button" onPress={onPress} style={styles.choice}>
+          <LinearGradient colors={gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.choiceFill}>
+            <ShimmerBar />
+            {labelNode}
+          </LinearGradient>
+        </Pressable>
+      ) : (
+        <Pressable accessibilityRole="button" onPress={onPress} style={[styles.choice, styles.choiceIdle]}>
+          {labelNode}
+        </Pressable>
+      )}
+    </View>
   );
 }
 
@@ -321,19 +354,28 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 8,
   },
-  choice: {
+  choiceSlot: {
     flex: 1,
-    flexBasis: 0,
+    minWidth: 0,
+  },
+  choice: {
+    width: '100%',
     backgroundColor: colors.cardStrong,
     borderRadius: 14,
-    paddingVertical: 14,
-    paddingHorizontal: 8,
+    overflow: 'hidden',
     borderWidth: 2,
     borderColor: 'transparent',
+    borderBottomWidth: 5,
+    borderBottomColor: 'rgba(0,0,0,0.3)',
   },
-  choiceOn: {
-    backgroundColor: colors.turquoise,
-    borderColor: 'rgba(255,255,255,0.35)',
+  choiceIdle: {
+    paddingVertical: 14,
+    paddingHorizontal: 8,
+  },
+  choiceFill: {
+    paddingVertical: 14,
+    paddingHorizontal: 8,
+    overflow: 'hidden',
   },
   choiceText: {
     color: colors.white,
@@ -419,10 +461,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.lime,
     borderRadius: 18,
     paddingVertical: 16,
-    marginTop: 'auto',
-  },
-  disabled: {
-    opacity: 0.45,
+    marginTop: 16,
   },
   primaryText: {
     color: colors.black,
@@ -430,5 +469,19 @@ const styles = StyleSheet.create({
     fontFamily: font.display,
     fontSize: 22,
     letterSpacing: 1,
+  },
+  start: {
+    marginTop: 'auto',
+  },
+  countdown: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.72)',
+    pointerEvents: 'none',
   },
 });

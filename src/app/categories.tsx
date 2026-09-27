@@ -4,6 +4,7 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { FadeScale, GlowButton, PopIn } from '@/components/motion';
 import { NeonText } from '@/components/neon-text';
 import { ScreenFrame } from '@/components/screen-frame';
 import { categories, type Category } from '@/data/categories';
@@ -28,7 +29,11 @@ export default function CategoriesScreen() {
         <Pressable accessibilityRole="button" onPress={() => router.back()} style={styles.back}>
           <Text style={styles.backText}>Geri</Text>
         </Pressable>
-        <NeonText size={32} color={colors.turquoise}>
+        <NeonText
+          size={32}
+          color={colors.turquoise}
+          gradient={[colors.turquoise, colors.magenta, colors.yellow]}
+        >
           Kategoriler
         </NeonText>
       </View>
@@ -39,7 +44,7 @@ export default function CategoriesScreen() {
             accessibilityRole="button"
             accessibilityLabel={category.title}
             onPress={() => setSelected(category)}
-            style={styles.card}
+            style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
           >
             <Image source={category.image} style={styles.image} resizeMode="cover" />
             <View style={styles.cardBody}>
@@ -51,8 +56,9 @@ export default function CategoriesScreen() {
         ))}
       </ScrollView>
       {selected ? (
-        <View style={styles.modalBackdrop}>
-          <View style={styles.modal}>
+        <FadeScale style={styles.modalBackdrop}>
+          <PopIn>
+            <View style={styles.modal}>
             <Image source={selected.image} style={styles.modalImage} resizeMode="cover" />
             <Text style={styles.emojiLarge}>{selected.emoji}</Text>
             <NeonText size={28} color={colors.yellow}>
@@ -62,15 +68,19 @@ export default function CategoriesScreen() {
             {selected.locked ? (
               <Text style={styles.lockedNote}>Bu kategori yakında açılacak.</Text>
             ) : (
-              <Pressable accessibilityRole="button" onPress={play} style={styles.play}>
-                <Text style={styles.playText}>Şimdi Oyna</Text>
-              </Pressable>
+              <GlowButton
+                label="Şimdi Oyna"
+                onPress={play}
+                gradient={[colors.lime, colors.turquoise]}
+                textColor={colors.black}
+              />
             )}
             <Pressable accessibilityRole="button" onPress={() => setSelected(null)} style={styles.close}>
               <Text style={styles.closeText}>Kapat</Text>
             </Pressable>
-          </View>
-        </View>
+            </View>
+          </PopIn>
+        </FadeScale>
       ) : null}
     </ScreenFrame>
   );
@@ -107,6 +117,12 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: colors.cardBorder,
     backgroundColor: colors.card,
+    borderBottomWidth: 6,
+    borderBottomColor: 'rgba(0,0,0,0.35)',
+  },
+  cardPressed: {
+    transform: [{ scale: 0.98 }, { translateY: 2 }],
+    borderBottomWidth: 2,
   },
   image: {
     position: 'absolute',
@@ -178,18 +194,6 @@ const styles = StyleSheet.create({
     color: colors.yellow,
     textAlign: 'center',
     letterSpacing: 0.5,
-  },
-  play: {
-    backgroundColor: colors.lime,
-    borderRadius: 16,
-    paddingVertical: 14,
-  },
-  playText: {
-    color: colors.black,
-    textAlign: 'center',
-    fontFamily: font.display,
-    fontSize: 20,
-    letterSpacing: 1,
   },
   close: {
     paddingVertical: 8,
