@@ -31,14 +31,17 @@ const styles = StyleSheet.create({
   },
   safe: {
     flex: 1,
+    minHeight: 0,
   },
   column: {
     flex: 1,
+    minHeight: 0,
     width: '100%',
     maxWidth: layout.maxWidth,
     alignSelf: 'center',
     paddingHorizontal: layout.padding,
     paddingVertical: 16,
+    overflow: 'hidden',
   },
   glow: {
     position: 'absolute',
