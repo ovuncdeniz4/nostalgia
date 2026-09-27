@@ -5,7 +5,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, ViewStyle } from 'react-native';
 
-import { FadeScale, GlowButton, Pulse, ShimmerBar } from '@/components/motion';
+import { GlowButton, Pulse, ShimmerBar } from '@/components/motion';
 import { NeonText } from '@/components/neon-text';
 import { ScreenFrame, webScrollStyle } from '@/components/screen-frame';
 import { findCategory } from '@/data/categories';
@@ -428,7 +428,7 @@ function Fold({
         </View>
         <Text style={[styles.chevron, open && styles.chevronOpen]}>⌄</Text>
       </Pressable>
-      {open ? <FadeScale>{children}</FadeScale> : null}
+      {open ? <View>{children}</View> : null}
     </View>
   );
 }
@@ -581,7 +581,6 @@ const styles = StyleSheet.create({
   choiceOn: {
     borderColor: 'rgba(255,255,255,0.3)',
     borderBottomColor: 'rgba(0,0,0,0.35)',
-    borderBottomWidth: 6,
   },
   choiceFill: {
     paddingVertical: 16,
