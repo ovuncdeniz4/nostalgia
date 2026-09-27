@@ -26,6 +26,8 @@ type AtmosphereTone = 'welcome' | 'play' | 'results';
 const webBlur = (radius: number): ViewStyle | null =>
   Platform.OS === 'web' ? ({ filter: `blur(${radius}px)` } as ViewStyle) : null;
 
+const webClip = Platform.OS === 'web' ? ({ overflow: 'clip' } as unknown as ViewStyle) : null;
+
 function fadeScale(delay: number) {
   return new Keyframe({
     0: { opacity: 0, transform: [{ scale: 0.95 }] },
@@ -124,7 +126,7 @@ export function RetroAtmosphere({ tone = 'play' }: { tone?: AtmosphereTone }) {
           ];
 
   return (
-    <View style={[StyleSheet.absoluteFill, styles.ignore]}>
+    <View style={[StyleSheet.absoluteFill, styles.ignore, styles.clip, webClip]}>
       {orbs.map((orb) => (
         <PulseOrb key={`${orb.color}-${orb.delay}`} {...orb} />
       ))}
@@ -213,14 +215,16 @@ export function ShimmerBar() {
     transform: [{ translateX: travel.value * 240 }],
   }));
   return (
-    <Animated.View style={[styles.shine, styles.ignore, animated]}>
-      <LinearGradient
-        colors={['transparent', 'rgba(255,255,255,0.45)', 'transparent']}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
-        style={StyleSheet.absoluteFill}
-      />
-    </Animated.View>
+    <View style={[styles.shineClip, webClip]}>
+      <Animated.View style={[styles.shine, styles.ignore, animated]}>
+        <LinearGradient
+          colors={['transparent', 'rgba(255,255,255,0.45)', 'transparent']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={StyleSheet.absoluteFill}
+        />
+      </Animated.View>
+    </View>
   );
 }
 
@@ -263,7 +267,7 @@ export function GlowButton({
           pressed.value = withTiming(0, { duration: 140 });
         }}
       >
-        <LinearGradient colors={gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.button}>
+        <LinearGradient colors={gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={[styles.button, webClip]}>
           {disabled ? null : <ShimmerBar />}
           <View style={styles.buttonRow}>
             {leading ? <Text style={[styles.buttonIcon, { color: textColor }]}>{leading}</Text> : null}
@@ -320,6 +324,17 @@ const styles = StyleSheet.create({
   star: {
     position: 'absolute',
     fontSize: 18,
+  },
+  clip: {
+    overflow: 'hidden',
+  },
+  shineClip: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    overflow: 'hidden',
   },
   shine: {
     position: 'absolute',

@@ -2,7 +2,7 @@
 
 import { LinearGradient } from 'expo-linear-gradient';
 import { ReactNode } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View, ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { RetroAtmosphere } from '@/components/motion';
@@ -30,10 +30,21 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.bg0,
     overflow: 'hidden',
+    ...(Platform.OS === 'web'
+      ? ({
+          position: 'fixed',
+          top: 0,
+          right: 0,
+          bottom: 0,
+          left: 0,
+          overflow: 'clip',
+        } as unknown as ViewStyle)
+      : null),
   },
   safe: {
     flex: 1,
     minHeight: 0,
+    overflow: 'hidden',
   },
   column: {
     flex: 1,
@@ -44,5 +55,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: layout.padding,
     paddingVertical: 16,
     overflow: 'hidden',
+    ...(Platform.OS === 'web'
+      ? ({ touchAction: 'pan-y', overflow: 'clip' } as unknown as ViewStyle)
+      : null),
   },
 });
