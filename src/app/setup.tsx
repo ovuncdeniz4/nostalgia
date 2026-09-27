@@ -223,7 +223,7 @@ export default function SetupScreen() {
         >
           <View style={styles.sectionRow}>
             <IconBadge glyph="⚡" gradient={[colors.orange, colors.yellow]} />
-            <Text style={[styles.sectionTitle, styles.sectionGrow]}>Zorluk</Text>
+            <Text style={styles.sectionTitle}>Zorluk</Text>
           </View>
           <View style={styles.panel}>
             <View style={styles.row}>
@@ -258,14 +258,11 @@ export default function SetupScreen() {
 
           <View style={styles.sectionRow}>
             <IconBadge glyph="⏱" gradient={[colors.pink, colors.purple]} ink={colors.white} />
-            <Text style={[styles.sectionTitle, styles.sectionGrow]}>Tur Süresi</Text>
-            <View style={styles.valuePill}>
-              <Text style={styles.valuePillText}>{roundTimer}s</Text>
-            </View>
+            <Text style={styles.sectionTitle}>Tur Süresi</Text>
           </View>
           <View style={styles.panel}>
             <View style={styles.row}>
-              {TIMER_OPTIONS.slice(0, 4).map((seconds) => (
+              {TIMER_OPTIONS.slice(0, 3).map((seconds) => (
                 <Choice
                   key={seconds}
                   label={`${seconds}s`}
@@ -276,47 +273,24 @@ export default function SetupScreen() {
               ))}
             </View>
             <View style={styles.row}>
-              <View style={styles.quarter}>
+              {TIMER_OPTIONS.slice(3).map((seconds) => (
                 <Choice
-                  label="120s"
-                  selected={roundTimer === 120}
+                  key={seconds}
+                  label={`${seconds}s`}
+                  selected={roundTimer === seconds}
                   gradient={[colors.lime, colors.turquoise]}
-                  onPress={() => setRoundTimer(120)}
+                  onPress={() => setRoundTimer(seconds)}
                 />
-              </View>
+              ))}
             </View>
           </View>
 
           <View style={styles.sectionRow}>
             <IconBadge glyph="⏭" gradient={[colors.lime, colors.turquoise]} />
-            <Text style={[styles.sectionTitle, styles.sectionGrow]}>Pas Sayısı</Text>
-            <View style={styles.valuePill}>
-              <Text style={styles.valuePillText}>{passCount}</Text>
-            </View>
+            <Text style={styles.sectionTitle}>Pas Sayısı</Text>
           </View>
           <View style={styles.panel}>
-            <View style={styles.stepper}>
-              <Pressable
-                accessibilityRole="button"
-                onPress={() => setPassCount((count) => Math.max(PASS_MIN, count - 1))}
-                style={styles.step}
-              >
-                <Text style={styles.stepText}>−</Text>
-              </Pressable>
-              <Text style={styles.passValue}>{passCount}</Text>
-              <Pressable
-                accessibilityRole="button"
-                onPress={() => setPassCount((count) => Math.min(PASS_MAX, count + 1))}
-                style={styles.step}
-              >
-                <Text style={styles.stepText}>+</Text>
-              </Pressable>
-            </View>
-            <View style={styles.passScale}>
-              <Text style={styles.passScaleText}>1</Text>
-              <Text style={styles.passScaleText}>5</Text>
-              <Text style={styles.passScaleText}>10</Text>
-            </View>
+            <PassSlider value={passCount} onChange={setPassCount} />
           </View>
         </Fold>
 
@@ -341,6 +315,53 @@ export default function SetupScreen() {
         </View>
       ) : null}
     </ScreenFrame>
+  );
+}
+
+function PassSlider({ value, onChange }: { value: number; onChange: (next: number) => void }) {
+  const [width, setWidth] = useState(0);
+  const span = PASS_MAX - PASS_MIN;
+  const ratio = (value - PASS_MIN) / span;
+  const thumb = 28;
+  const left = width === 0 ? 0 : ratio * Math.max(0, width - thumb);
+
+  const pick = (x: number) => {
+    if (width <= 0) {
+      return;
+    }
+    const clamped = Math.min(1, Math.max(0, x / width));
+    onChange(PASS_MIN + Math.round(clamped * span));
+  };
+
+  return (
+    <View style={styles.sliderBlock}>
+      <View
+        accessibilityRole="adjustable"
+        accessibilityLabel="Pas sayısı"
+        accessibilityValue={{ min: PASS_MIN, max: PASS_MAX, now: value }}
+        onLayout={(event) => setWidth(event.nativeEvent.layout.width)}
+        onStartShouldSetResponder={() => true}
+        onMoveShouldSetResponder={() => true}
+        onResponderGrant={(event) => pick(event.nativeEvent.locationX)}
+        onResponderMove={(event) => pick(event.nativeEvent.locationX)}
+        style={styles.sliderHit}
+      >
+        <View style={styles.sliderTrack}>
+          <LinearGradient
+            colors={[colors.lime, colors.turquoise]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={[styles.sliderFill, { width: left + thumb / 2 }]}
+          />
+        </View>
+        <LinearGradient colors={[colors.lime, colors.turquoise]} style={[styles.sliderThumb, { left }]} />
+      </View>
+      <View style={styles.passScale}>
+        <Text style={styles.passScaleText}>1</Text>
+        <Text style={styles.passScaleText}>5</Text>
+        <Text style={styles.passScaleText}>10</Text>
+      </View>
+    </View>
   );
 }
 
@@ -430,7 +451,7 @@ function Choice({
     <View style={styles.choiceBody}>
       {icon ? <Text style={styles.choiceIcon}>{icon}</Text> : null}
       <Text style={[styles.choiceText, { color }]}>{label}</Text>
-      {selected && mark ? <Text style={styles.choiceMark}>{mark}</Text> : null}
+      {mark ? <Text style={[styles.choiceMark, !selected && styles.markHidden]}>{mark}</Text> : null}
     </View>
   );
 
@@ -509,9 +530,6 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     textTransform: 'uppercase',
   },
-  sectionGrow: {
-    flex: 1,
-  },
   badge: {
     width: 40,
     height: 40,
@@ -538,11 +556,6 @@ const styles = StyleSheet.create({
   },
   choiceSlot: {
     flex: 1,
-    minWidth: 0,
-  },
-  quarter: {
-    flex: 1,
-    maxWidth: '25%',
     minWidth: 0,
   },
   choice: {
@@ -583,6 +596,11 @@ const styles = StyleSheet.create({
   },
   choiceMark: {
     fontSize: 12,
+    lineHeight: 16,
+    minHeight: 16,
+  },
+  markHidden: {
+    opacity: 0,
   },
   block: {
     gap: 12,
@@ -673,45 +691,33 @@ const styles = StyleSheet.create({
     color: colors.hard,
     textAlign: 'center',
   },
-  valuePill: {
-    backgroundColor: colors.turquoise,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderBottomWidth: 3,
-    borderBottomColor: 'rgba(0,0,0,0.3)',
-  },
-  valuePillText: {
-    color: colors.black,
-    fontFamily: font.display,
-    fontSize: 16,
-  },
-  stepper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 16,
+  sliderBlock: {
+    gap: 10,
+    paddingHorizontal: 8,
     paddingVertical: 8,
   },
-  step: {
-    width: 48,
-    height: 48,
-    borderRadius: 14,
-    backgroundColor: colors.lime,
-    alignItems: 'center',
+  sliderHit: {
+    height: 36,
     justifyContent: 'center',
   },
-  stepText: {
-    color: colors.black,
-    fontSize: 28,
-    lineHeight: 30,
+  sliderTrack: {
+    height: 8,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    overflow: 'hidden',
   },
-  passValue: {
-    color: colors.white,
-    fontFamily: font.display,
-    fontSize: 28,
-    minWidth: 36,
-    textAlign: 'center',
+  sliderFill: {
+    height: 8,
+    borderRadius: 8,
+  },
+  sliderThumb: {
+    position: 'absolute',
+    top: 4,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 3,
+    borderColor: colors.white,
   },
   passScale: {
     flexDirection: 'row',
