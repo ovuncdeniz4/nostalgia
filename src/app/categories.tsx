@@ -6,7 +6,7 @@ import { Image, Pressable, ScrollView, StyleSheet, Text, View } from 'react-nati
 
 import { FadeScale, GlowButton, PopIn } from '@/components/motion';
 import { NeonText } from '@/components/neon-text';
-import { ScreenFrame } from '@/components/screen-frame';
+import { ScreenFrame, webScrollStyle } from '@/components/screen-frame';
 import { categories, type Category } from '@/data/categories';
 import { colors, font } from '@/theme/tokens';
 
@@ -37,7 +37,11 @@ export default function CategoriesScreen() {
           Kategoriler
         </NeonText>
       </View>
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={[styles.scroll, webScrollStyle]}
+        contentContainerStyle={styles.list}
+        showsVerticalScrollIndicator={false}
+      >
         {categories.map((category) => (
           <Pressable
             key={category.id}

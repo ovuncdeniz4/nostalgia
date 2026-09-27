@@ -7,7 +7,7 @@ import { Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, Vie
 
 import { FadeScale, GlowButton, Pulse, ShimmerBar } from '@/components/motion';
 import { NeonText } from '@/components/neon-text';
-import { ScreenFrame } from '@/components/screen-frame';
+import { ScreenFrame, webScrollStyle } from '@/components/screen-frame';
 import { findCategory } from '@/data/categories';
 import {
   PASS_MAX,
@@ -132,7 +132,11 @@ export default function SetupScreen() {
       <Pressable accessibilityRole="button" accessibilityLabel="Geri" onPress={() => router.back()} style={styles.back}>
         <Text style={styles.backArrow}>←</Text>
       </Pressable>
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.form} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={[styles.scroll, webScrollStyle]}
+        contentContainerStyle={[styles.form, webClip]}
+        showsVerticalScrollIndicator={false}
+      >
         <LinearGradient
           colors={['rgba(255,0,255,0.18)', 'rgba(0,217,255,0.18)']}
           start={{ x: 0, y: 0 }}

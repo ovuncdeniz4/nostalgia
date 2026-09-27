@@ -206,7 +206,7 @@ export function Pulse({ children }: { children: ReactNode }) {
   return <Animated.View style={animated}>{children}</Animated.View>;
 }
 
-export function ShimmerBar() {
+function NativeShimmer() {
   const travel = useSharedValue(-1);
   useEffect(() => {
     travel.value = withRepeat(withTiming(1, { duration: 1600, easing: Easing.linear }), -1, false);
@@ -215,7 +215,7 @@ export function ShimmerBar() {
     transform: [{ translateX: travel.value * 240 }],
   }));
   return (
-    <View style={[styles.shineClip, webClip]}>
+    <View style={styles.shineClip}>
       <Animated.View style={[styles.shine, styles.ignore, animated]}>
         <LinearGradient
           colors={['transparent', 'rgba(255,255,255,0.45)', 'transparent']}
@@ -226,6 +226,40 @@ export function ShimmerBar() {
       </Animated.View>
     </View>
   );
+}
+
+// Web shimmer stays inside the button. A translated bar widens the scrollport and the setup page pans sideways.
+const shineWeb =
+  Platform.OS === 'web'
+    ? StyleSheet.create({
+        bar: {
+          position: 'absolute',
+          top: 0,
+          right: 0,
+          bottom: 0,
+          left: 0,
+          pointerEvents: 'none',
+          overflow: 'hidden',
+          backgroundImage:
+            'linear-gradient(100deg, transparent 30%, rgba(255,255,255,0.45) 50%, transparent 70%)',
+          backgroundSize: '45% 100%',
+          backgroundRepeat: 'no-repeat',
+          animationDuration: '1600ms',
+          animationTimingFunction: 'linear',
+          animationIterationCount: 'infinite',
+          animationKeyframes: {
+            from: { backgroundPosition: '-20%' },
+            to: { backgroundPosition: '120%' },
+          },
+        } as ViewStyle,
+      }).bar
+    : null;
+
+export function ShimmerBar() {
+  if (shineWeb) {
+    return <View style={shineWeb} />;
+  }
+  return <NativeShimmer />;
 }
 
 interface GlowButtonProps {
