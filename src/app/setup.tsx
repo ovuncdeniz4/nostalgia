@@ -3,7 +3,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, ViewStyle } from 'react-native';
 
 import { FadeScale, GlowButton, Pulse, ShimmerBar } from '@/components/motion';
 import { NeonText } from '@/components/neon-text';
@@ -21,6 +21,8 @@ import {
 import { useSession } from '@/game/session';
 import { loadPrefs, savePrefs } from '@/storage/prefs';
 import { colors, font } from '@/theme/tokens';
+
+const webClip = Platform.OS === 'web' ? ({ overflow: 'clip' } as unknown as ViewStyle) : null;
 
 const difficulties: { id: Difficulty; label: string; fill?: string; gradient?: readonly [string, string]; ink: string; mark: string }[] = [
   { id: 'easy', label: 'Kolay', fill: colors.yellow, ink: colors.black, mark: '⭐' },
@@ -457,7 +459,11 @@ function Choice({
 
   return (
     <View style={styles.choiceSlot}>
-      <Pressable accessibilityRole="button" onPress={onPress} style={[styles.choice, selected && styles.choiceOn]}>
+      <Pressable
+        accessibilityRole="button"
+        onPress={onPress}
+        style={[styles.choice, selected && styles.choiceOn, webClip]}
+      >
         {selected && gradient ? (
           <LinearGradient colors={gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.choiceFill}>
             <ShimmerBar />
@@ -572,7 +578,6 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.3)',
     borderBottomColor: 'rgba(0,0,0,0.35)',
     borderBottomWidth: 6,
-    transform: [{ translateY: -2 }],
   },
   choiceFill: {
     paddingVertical: 16,
