@@ -8,7 +8,7 @@ Welcome, categories, setup, game, results. Navigation is an Expo Router stack wi
 
 ## Data
 
-- `src/data` ships categories and questions inside the app. Prompts and revealed answers are Turkish. Names and song titles stay as people say them.
+- `src/data` ships categories and questions inside the app. Prompts and revealed answers are Turkish. Names and song titles stay as people say them. Open decks are 1990–2009 Turkish nostalgia, and each answer has one canonical match.
 - Locked categories render, and setup refuses them.
 - `src/game/engine.ts` is pure: filtering, scoring, passes, and the three-round party rule.
 - `src/storage` keeps the last setup prefs and scoreboard in AsyncStorage (localStorage on web).
