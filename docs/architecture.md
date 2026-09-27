@@ -4,7 +4,7 @@ Local quiz for one phone. The same Expo project runs on the web first, then iOS 
 
 ## Flow
 
-Welcome, categories, setup, game, results. Navigation is an Expo Router stack. A round lives in the Zustand session and is discarded when the player leaves.
+Welcome, categories, setup, game, results. Navigation is an Expo Router stack with a short slide between screens. Shared motion (pulsing neon, grain, shimmer, fade, and bounce) lives in `src/components/motion.tsx` and follows the Figma quiz timings. A round lives in the Zustand session and is discarded when the player leaves.
 
 ## Data
 

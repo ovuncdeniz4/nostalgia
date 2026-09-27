@@ -1,22 +1,23 @@
-// Shared phone column: neon background behind every quiz screen.
+// Shared phone column: moving neon, grain, and stars sit behind every quiz screen.
 
 import { LinearGradient } from 'expo-linear-gradient';
 import { ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { RetroAtmosphere } from '@/components/motion';
 import { colors, layout } from '@/theme/tokens';
 
 interface ScreenFrameProps {
   children: ReactNode;
+  tone?: 'welcome' | 'play' | 'results';
 }
 
-export function ScreenFrame({ children }: ScreenFrameProps) {
+export function ScreenFrame({ children, tone = 'play' }: ScreenFrameProps) {
   return (
     <View style={styles.root}>
       <LinearGradient colors={[colors.bg0, colors.bg1, colors.bg2]} style={StyleSheet.absoluteFill} />
-      <View style={[styles.glow, styles.glowLeft]} />
-      <View style={[styles.glow, styles.glowRight]} />
+      <RetroAtmosphere tone={tone} />
       <SafeAreaView style={styles.safe}>
         <View style={styles.column}>{children}</View>
       </SafeAreaView>
@@ -28,6 +29,7 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
     backgroundColor: colors.bg0,
+    overflow: 'hidden',
   },
   safe: {
     flex: 1,
@@ -42,22 +44,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: layout.padding,
     paddingVertical: 16,
     overflow: 'hidden',
-  },
-  glow: {
-    position: 'absolute',
-    width: 220,
-    height: 220,
-    borderRadius: 110,
-    opacity: 0.22,
-  },
-  glowLeft: {
-    top: 40,
-    left: -80,
-    backgroundColor: colors.magenta,
-  },
-  glowRight: {
-    bottom: 80,
-    right: -90,
-    backgroundColor: colors.turquoise,
   },
 });
