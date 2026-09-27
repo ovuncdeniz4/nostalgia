@@ -231,6 +231,8 @@ interface GlowButtonProps {
   textColor?: string;
   disabled?: boolean;
   style?: ViewStyle;
+  leading?: string;
+  trailing?: string;
 }
 
 export function GlowButton({
@@ -240,6 +242,8 @@ export function GlowButton({
   textColor = colors.white,
   disabled = false,
   style,
+  leading,
+  trailing,
 }: GlowButtonProps) {
   const pressed = useSharedValue(0);
   const animated = useAnimatedStyle(() => ({
@@ -261,7 +265,11 @@ export function GlowButton({
       >
         <LinearGradient colors={gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.button}>
           {disabled ? null : <ShimmerBar />}
-          <Text style={[styles.buttonText, { color: textColor }]}>{label}</Text>
+          <View style={styles.buttonRow}>
+            {leading ? <Text style={[styles.buttonIcon, { color: textColor }]}>{leading}</Text> : null}
+            <Text style={[styles.buttonText, { color: textColor }]}>{label}</Text>
+            {trailing ? <Text style={[styles.buttonIcon, { color: textColor }]}>{trailing}</Text> : null}
+          </View>
         </LinearGradient>
       </Pressable>
     </Animated.View>
@@ -332,11 +340,20 @@ const styles = StyleSheet.create({
     borderBottomWidth: 6,
     borderBottomColor: 'rgba(0,0,0,0.35)',
   },
+  buttonRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+  },
   buttonText: {
     fontFamily: font.display,
     fontSize: 22,
     letterSpacing: 1,
     textTransform: 'uppercase',
+  },
+  buttonIcon: {
+    fontSize: 20,
   },
   disabled: {
     opacity: 0.45,

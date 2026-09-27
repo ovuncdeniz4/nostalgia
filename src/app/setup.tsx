@@ -1,9 +1,9 @@
-// Game setup: mode, teams, difficulty, timer, and passes, then a 3 second countdown.
+// Game setup. Layout follows the Figma screen: category card, mode tiles, settings row, start.
 
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 
 import { FadeScale, GlowButton, Pulse, ShimmerBar } from '@/components/motion';
 import { NeonText } from '@/components/neon-text';
@@ -22,11 +22,11 @@ import { useSession } from '@/game/session';
 import { loadPrefs, savePrefs } from '@/storage/prefs';
 import { colors, font } from '@/theme/tokens';
 
-const difficulties: { id: Difficulty; label: string }[] = [
-  { id: 'easy', label: 'Kolay' },
-  { id: 'medium', label: 'Orta' },
-  { id: 'hard', label: 'Zor' },
-  { id: 'random', label: 'Rastgele' },
+const difficulties: { id: Difficulty; label: string; fill?: string; gradient?: readonly [string, string]; ink: string; mark: string }[] = [
+  { id: 'easy', label: 'Kolay', fill: colors.yellow, ink: colors.black, mark: '⭐' },
+  { id: 'medium', label: 'Orta', fill: colors.orange, ink: colors.black, mark: '⭐⭐' },
+  { id: 'hard', label: 'Zor', fill: colors.hard, ink: colors.white, mark: '⭐⭐⭐' },
+  { id: 'random', label: 'Rastgele', gradient: [colors.purple, colors.pink], ink: colors.white, mark: '🎲' },
 ];
 
 export default function SetupScreen() {
@@ -40,7 +40,7 @@ export default function SetupScreen() {
     { id: 1, name: '' },
     { id: 2, name: '' },
   ]);
-  const [teamsOpen, setTeamsOpen] = useState(true);
+  const [teamsOpen, setTeamsOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [difficulty, setDifficulty] = useState<Difficulty>('random');
   const [roundTimer, setRoundTimer] = useState(60);
@@ -105,6 +105,7 @@ export default function SetupScreen() {
   }
 
   const ready = canStartGame(mode, teams) && countdown === null;
+  const namedTeams = teams.filter((team) => team.name.trim().length > 0).length;
 
   const updateTeam = (id: number, name: string) => {
     setTeams((current) => current.map((team) => (team.id === id ? { ...team, name } : team)));
@@ -126,84 +127,115 @@ export default function SetupScreen() {
 
   return (
     <ScreenFrame>
-      <View style={styles.header}>
-        <Pressable accessibilityRole="button" onPress={() => router.back()} style={styles.back}>
-          <Text style={styles.backText}>Geri</Text>
-        </Pressable>
-        <Text style={styles.emoji}>{category.emoji}</Text>
-        <NeonText size={30} color={colors.yellow}>
-          {category.title}
-        </NeonText>
-      </View>
+      <Pressable accessibilityRole="button" accessibilityLabel="Geri" onPress={() => router.back()} style={styles.back}>
+        <Text style={styles.backArrow}>←</Text>
+      </Pressable>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.form} showsVerticalScrollIndicator={false}>
-        <Text style={styles.section}>Oyun Modu</Text>
-        <View style={styles.row}>
-          <Choice
-            label="Tek Kişi"
-            selected={mode === 'solo'}
-            gradient={[colors.turquoise, colors.blue]}
-            onPress={() => setMode('solo')}
-          />
-          <Choice
-            label="Grup"
-            selected={mode === 'party'}
-            gradient={[colors.magenta, colors.purple]}
-            onPress={() => setMode('party')}
-          />
+        <LinearGradient
+          colors={['rgba(255,0,255,0.18)', 'rgba(0,217,255,0.18)']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.categoryCard}
+        >
+          <View style={styles.emojiTile}>
+            <Text style={styles.emoji}>{category.emoji}</Text>
+          </View>
+          <NeonText
+            size={28}
+            color={colors.magenta}
+            gradient={[colors.magenta, colors.turquoise, colors.turquoise]}
+            style={styles.categoryTitle}
+          >
+            {category.title}
+          </NeonText>
+        </LinearGradient>
+
+        <View style={styles.sectionRow}>
+          <IconBadge glyph="👥" gradient={[colors.turquoise, colors.blue]} />
+          <Text style={styles.sectionTitle}>Oyun Modu</Text>
+        </View>
+        <View style={styles.panel}>
+          <View style={styles.row}>
+            <Choice
+              icon="👤"
+              label="Tek Kişi"
+              selected={mode === 'solo'}
+              gradient={[colors.turquoise, colors.blue]}
+              onPress={() => setMode('solo')}
+            />
+            <Choice
+              icon="👥"
+              label="Grup"
+              selected={mode === 'party'}
+              gradient={[colors.magenta, colors.purple]}
+              onPress={() => setMode('party')}
+            />
+          </View>
         </View>
 
         {mode === 'party' ? (
-          <View style={styles.block}>
-            <Pressable accessibilityRole="button" onPress={() => setTeamsOpen((open) => !open)}>
-              <Text style={styles.section}>Takımları Ayarla {teamsOpen ? '−' : '+'}</Text>
-            </Pressable>
-            {teamsOpen ? (
-              <FadeScale>
-                {teams.map((team, index) => (
-                  <View key={team.id} style={styles.teamRow}>
-                    <Text style={styles.teamIndex}>{index + 1}</Text>
-                    <TextInput
-                      value={team.name}
-                      onChangeText={(name) => updateTeam(team.id, name)}
-                      placeholder={`Takım ${index + 1} adı`}
-                      placeholderTextColor={colors.textMuted}
-                      style={styles.input}
-                    />
-                    {teams.length > 2 ? (
-                      <Pressable accessibilityRole="button" onPress={() => removeTeam(team.id)}>
-                        <Text style={styles.remove}>Sil</Text>
-                      </Pressable>
-                    ) : null}
-                  </View>
-                ))}
-              </FadeScale>
-            ) : null}
-            {teamsOpen && teams.length < 6 ? (
+          <Fold
+            glyph="👥"
+            gradient={[colors.magenta, colors.purple]}
+            ink={colors.white}
+            title="Takımları Ayarla"
+            subtitle={`${namedTeams} takım hazır`}
+            open={teamsOpen}
+            onPress={() => setTeamsOpen((open) => !open)}
+          >
+            {teams.map((team, index) => (
+              <View key={team.id} style={styles.teamCard}>
+                <LinearGradient colors={teamGradient(index)} style={styles.teamBadge}>
+                  <Text style={styles.teamIndex}>{index + 1}</Text>
+                </LinearGradient>
+                <TextInput
+                  value={team.name}
+                  onChangeText={(name) => updateTeam(team.id, name)}
+                  placeholder={`Takım ${index + 1} adı`}
+                  placeholderTextColor={colors.textMuted}
+                  style={styles.input}
+                />
+                {teams.length > 2 ? (
+                  <Pressable accessibilityRole="button" onPress={() => removeTeam(team.id)}>
+                    <Text style={styles.remove}>Sil</Text>
+                  </Pressable>
+                ) : null}
+              </View>
+            ))}
+            {teams.length < 6 ? (
               <Pressable accessibilityRole="button" onPress={addTeam} style={styles.secondary}>
-                <Text style={styles.secondaryText}>Takım Ekle</Text>
+                <Text style={styles.secondaryText}>+ Takım Ekle</Text>
               </Pressable>
             ) : null}
             {!canStartGame(mode, teams) ? (
               <Text style={styles.warning}>Başlamak için en az 2 takım adı girin</Text>
             ) : null}
-          </View>
+          </Fold>
         ) : null}
 
-        <Pressable accessibilityRole="button" onPress={() => setSettingsOpen((open) => !open)}>
-          <Text style={styles.section}>
-            Ayarlar {settingsOpen ? '−' : '+'} · {roundTimer}s · {passCount} pas
-          </Text>
-        </Pressable>
-        {settingsOpen ? (
-          <FadeScale>
-          <View style={styles.block}>
-            <Text style={styles.label}>Zorluk</Text>
+        <Fold
+          glyph="⚙"
+          gradient={[colors.orange, colors.yellow]}
+          title="Ayarlar"
+          subtitle={`Zorluk · ${roundTimer}s · ${passCount} pas`}
+          open={settingsOpen}
+          onPress={() => setSettingsOpen((open) => !open)}
+        >
+          <View style={styles.sectionRow}>
+            <IconBadge glyph="⚡" gradient={[colors.orange, colors.yellow]} />
+            <Text style={[styles.sectionTitle, styles.sectionGrow]}>Zorluk</Text>
+          </View>
+          <View style={styles.panel}>
             <View style={styles.row}>
               {difficulties.slice(0, 2).map((item) => (
                 <Choice
                   key={item.id}
                   label={item.label}
+                  mark={item.mark}
                   selected={difficulty === item.id}
+                  fill={item.fill}
+                  gradient={item.gradient}
+                  ink={item.ink}
                   onPress={() => setDifficulty(item.id)}
                 />
               ))}
@@ -213,33 +245,56 @@ export default function SetupScreen() {
                 <Choice
                   key={item.id}
                   label={item.label}
+                  mark={item.mark}
                   selected={difficulty === item.id}
+                  fill={item.fill}
+                  gradient={item.gradient}
+                  ink={item.ink}
                   onPress={() => setDifficulty(item.id)}
                 />
               ))}
             </View>
-            <Text style={styles.label}>Tur Süresi</Text>
+          </View>
+
+          <View style={styles.sectionRow}>
+            <IconBadge glyph="⏱" gradient={[colors.pink, colors.purple]} ink={colors.white} />
+            <Text style={[styles.sectionTitle, styles.sectionGrow]}>Tur Süresi</Text>
+            <View style={styles.valuePill}>
+              <Text style={styles.valuePillText}>{roundTimer}s</Text>
+            </View>
+          </View>
+          <View style={styles.panel}>
             <View style={styles.row}>
-              {TIMER_OPTIONS.slice(0, 3).map((seconds) => (
+              {TIMER_OPTIONS.slice(0, 4).map((seconds) => (
                 <Choice
                   key={seconds}
                   label={`${seconds}s`}
                   selected={roundTimer === seconds}
+                  gradient={[colors.lime, colors.turquoise]}
                   onPress={() => setRoundTimer(seconds)}
                 />
               ))}
             </View>
             <View style={styles.row}>
-              {TIMER_OPTIONS.slice(3).map((seconds) => (
+              <View style={styles.quarter}>
                 <Choice
-                  key={seconds}
-                  label={`${seconds}s`}
-                  selected={roundTimer === seconds}
-                  onPress={() => setRoundTimer(seconds)}
+                  label="120s"
+                  selected={roundTimer === 120}
+                  gradient={[colors.lime, colors.turquoise]}
+                  onPress={() => setRoundTimer(120)}
                 />
-              ))}
+              </View>
             </View>
-            <Text style={styles.label}>Pas Sayısı</Text>
+          </View>
+
+          <View style={styles.sectionRow}>
+            <IconBadge glyph="⏭" gradient={[colors.lime, colors.turquoise]} />
+            <Text style={[styles.sectionTitle, styles.sectionGrow]}>Pas Sayısı</Text>
+            <View style={styles.valuePill}>
+              <Text style={styles.valuePillText}>{passCount}</Text>
+            </View>
+          </View>
+          <View style={styles.panel}>
             <View style={styles.stepper}>
               <Pressable
                 accessibilityRole="button"
@@ -257,11 +312,18 @@ export default function SetupScreen() {
                 <Text style={styles.stepText}>+</Text>
               </Pressable>
             </View>
+            <View style={styles.passScale}>
+              <Text style={styles.passScaleText}>1</Text>
+              <Text style={styles.passScaleText}>5</Text>
+              <Text style={styles.passScaleText}>10</Text>
+            </View>
           </View>
-          </FadeScale>
-        ) : null}
+        </Fold>
+
         <GlowButton
           label={countdown !== null && countdown > 0 ? `${countdown}... içinde başlıyor` : 'Oyunu Başlat'}
+          leading={ready ? '▶' : undefined}
+          trailing={ready ? '🏆' : undefined}
           disabled={!ready}
           onPress={() => setCountdown(3)}
           gradient={ready ? [colors.lime, colors.turquoise] : [colors.cardStrong, colors.cardStrong]}
@@ -282,52 +344,125 @@ export default function SetupScreen() {
   );
 }
 
+function teamGradient(index: number): readonly [string, string] {
+  const palettes: readonly (readonly [string, string])[] = [
+    [colors.magenta, colors.purple],
+    [colors.turquoise, colors.blue],
+    [colors.orange, colors.yellow],
+    [colors.pink, colors.magenta],
+  ];
+  return palettes[index % palettes.length];
+}
+
+function IconBadge({
+  glyph,
+  gradient,
+  ink = colors.black,
+}: {
+  glyph: string;
+  gradient: readonly [string, string];
+  ink?: string;
+}) {
+  return (
+    <LinearGradient colors={gradient} style={styles.badge}>
+      <Text style={[styles.badgeGlyph, { color: ink }]}>{glyph}</Text>
+    </LinearGradient>
+  );
+}
+
+function Fold({
+  glyph,
+  gradient,
+  ink,
+  title,
+  subtitle,
+  open,
+  onPress,
+  children,
+}: {
+  glyph: string;
+  gradient: readonly [string, string];
+  ink?: string;
+  title: string;
+  subtitle: string;
+  open: boolean;
+  onPress: () => void;
+  children: ReactNode;
+}) {
+  return (
+    <View style={styles.block}>
+      <Pressable accessibilityRole="button" onPress={onPress} style={styles.fold}>
+        <View style={styles.foldMain}>
+          <IconBadge glyph={glyph} gradient={gradient} ink={ink} />
+          <View style={styles.foldCopy}>
+            <Text style={styles.sectionTitle}>{title}</Text>
+            <Text style={styles.foldSub}>{subtitle}</Text>
+          </View>
+        </View>
+        <Text style={[styles.chevron, open && styles.chevronOpen]}>⌄</Text>
+      </Pressable>
+      {open ? <FadeScale>{children}</FadeScale> : null}
+    </View>
+  );
+}
+
 function Choice({
   label,
+  icon,
+  mark,
   selected,
   onPress,
-  gradient = [colors.turquoise, colors.blue],
+  gradient,
+  fill,
+  ink = colors.black,
 }: {
   label: string;
+  icon?: string;
+  mark?: string;
   selected: boolean;
   onPress: () => void;
   gradient?: readonly [string, string];
+  fill?: string;
+  ink?: string;
 }) {
-  const labelNode = <Text style={[styles.choiceText, selected && styles.choiceTextOn]}>{label}</Text>;
+  const color = selected ? ink : colors.white;
+  const body = (
+    <View style={styles.choiceBody}>
+      {icon ? <Text style={styles.choiceIcon}>{icon}</Text> : null}
+      <Text style={[styles.choiceText, { color }]}>{label}</Text>
+      {selected && mark ? <Text style={styles.choiceMark}>{mark}</Text> : null}
+    </View>
+  );
+
   return (
     <View style={styles.choiceSlot}>
-      {selected ? (
-        <Pressable accessibilityRole="button" onPress={onPress} style={styles.choice}>
+      <Pressable accessibilityRole="button" onPress={onPress} style={[styles.choice, selected && styles.choiceOn]}>
+        {selected && gradient ? (
           <LinearGradient colors={gradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} style={styles.choiceFill}>
             <ShimmerBar />
-            {labelNode}
+            {body}
           </LinearGradient>
-        </Pressable>
-      ) : (
-        <Pressable accessibilityRole="button" onPress={onPress} style={[styles.choice, styles.choiceIdle]}>
-          {labelNode}
-        </Pressable>
-      )}
+        ) : (
+          <View style={[styles.choiceFill, selected && fill ? { backgroundColor: fill } : null]}>
+            {selected ? <ShimmerBar /> : null}
+            {body}
+          </View>
+        )}
+      </Pressable>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  header: {
-    alignItems: 'center',
-    gap: 4,
-    marginBottom: 8,
-  },
   back: {
     alignSelf: 'flex-start',
+    paddingVertical: 4,
+    paddingRight: 12,
   },
-  backText: {
+  backArrow: {
     color: colors.turquoise,
-    textTransform: 'uppercase',
-    letterSpacing: 1,
-  },
-  emoji: {
-    fontSize: 36,
+    fontSize: 28,
+    lineHeight: 32,
   },
   scroll: {
     flex: 1,
@@ -335,20 +470,67 @@ const styles = StyleSheet.create({
   },
   form: {
     flexGrow: 1,
-    gap: 12,
+    gap: 14,
     paddingBottom: 8,
   },
-  section: {
+  categoryCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
+    borderRadius: 24,
+    borderWidth: 3,
+    borderColor: 'rgba(255,255,255,0.2)',
+    padding: 16,
+  },
+  emojiTile: {
+    width: 72,
+    height: 72,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.3)',
+  },
+  emoji: {
+    fontSize: 36,
+  },
+  categoryTitle: {
+    flex: 1,
+    textAlign: 'left',
+  },
+  sectionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  sectionTitle: {
     color: colors.yellow,
     fontFamily: font.display,
     fontSize: 20,
     letterSpacing: 1,
-  },
-  label: {
-    color: colors.white,
-    letterSpacing: 1,
     textTransform: 'uppercase',
-    marginTop: 4,
+  },
+  sectionGrow: {
+    flex: 1,
+  },
+  badge: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderBottomWidth: 4,
+    borderBottomColor: 'rgba(0,0,0,0.3)',
+  },
+  badgeGlyph: {
+    fontSize: 18,
+  },
+  panel: {
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 18,
+    padding: 8,
+    gap: 8,
   },
   row: {
     flexDirection: 'row',
@@ -358,57 +540,117 @@ const styles = StyleSheet.create({
     flex: 1,
     minWidth: 0,
   },
+  quarter: {
+    flex: 1,
+    maxWidth: '25%',
+    minWidth: 0,
+  },
   choice: {
     width: '100%',
-    backgroundColor: colors.cardStrong,
     borderRadius: 14,
     overflow: 'hidden',
+    backgroundColor: 'rgba(255,255,255,0.08)',
     borderWidth: 2,
     borderColor: 'transparent',
-    borderBottomWidth: 5,
-    borderBottomColor: 'rgba(0,0,0,0.3)',
+    borderBottomWidth: 4,
+    borderBottomColor: 'rgba(0,0,0,0.25)',
   },
-  choiceIdle: {
-    paddingVertical: 14,
-    paddingHorizontal: 8,
+  choiceOn: {
+    borderColor: 'rgba(255,255,255,0.3)',
+    borderBottomColor: 'rgba(0,0,0,0.35)',
+    borderBottomWidth: 6,
+    transform: [{ translateY: -2 }],
   },
   choiceFill: {
-    paddingVertical: 14,
-    paddingHorizontal: 8,
+    paddingVertical: 16,
+    paddingHorizontal: 6,
     overflow: 'hidden',
+    alignItems: 'center',
+  },
+  choiceBody: {
+    alignItems: 'center',
+    gap: 6,
+  },
+  choiceIcon: {
+    fontSize: 26,
   },
   choiceText: {
-    color: colors.white,
     textAlign: 'center',
     letterSpacing: 1,
     textTransform: 'uppercase',
     fontFamily: font.display,
-    fontSize: 16,
+    fontSize: 15,
   },
-  choiceTextOn: {
-    color: colors.black,
+  choiceMark: {
+    fontSize: 12,
   },
   block: {
-    gap: 10,
+    gap: 12,
   },
-  teamRow: {
+  fold: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     gap: 8,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 18,
+    padding: 14,
+  },
+  foldMain: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  foldCopy: {
+    flex: 1,
+    gap: 2,
+  },
+  foldSub: {
+    color: colors.textMuted,
+    fontSize: 11,
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+  },
+  chevron: {
+    color: colors.turquoise,
+    fontSize: 28,
+    lineHeight: 28,
+  },
+  chevronOpen: {
+    transform: [{ rotate: '180deg' }],
+  },
+  teamCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.1)',
+    borderRadius: 16,
+    padding: 12,
+  },
+  teamBadge: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   teamIndex: {
     color: colors.white,
-    width: 24,
     fontFamily: font.display,
-    fontSize: 18,
+    fontSize: 20,
   },
   input: {
     flex: 1,
     color: colors.white,
-    backgroundColor: colors.cardStrong,
+    backgroundColor: 'rgba(255,255,255,0.08)',
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: colors.cardBorder,
+    borderColor: 'rgba(255,255,255,0.2)',
     paddingHorizontal: 12,
     paddingVertical: 10,
   },
@@ -417,8 +659,8 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   secondary: {
-    borderRadius: 14,
-    paddingVertical: 12,
+    borderRadius: 16,
+    paddingVertical: 14,
     backgroundColor: colors.purple,
   },
   secondaryText: {
@@ -431,11 +673,25 @@ const styles = StyleSheet.create({
     color: colors.hard,
     textAlign: 'center',
   },
+  valuePill: {
+    backgroundColor: colors.turquoise,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderBottomWidth: 3,
+    borderBottomColor: 'rgba(0,0,0,0.3)',
+  },
+  valuePillText: {
+    color: colors.black,
+    fontFamily: font.display,
+    fontSize: 16,
+  },
   stepper: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 16,
+    paddingVertical: 8,
   },
   step: {
     width: 48,
@@ -456,6 +712,15 @@ const styles = StyleSheet.create({
     fontSize: 28,
     minWidth: 36,
     textAlign: 'center',
+  },
+  passScale: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingHorizontal: 8,
+  },
+  passScaleText: {
+    color: colors.textMuted,
+    fontSize: 12,
   },
   primary: {
     backgroundColor: colors.lime,
