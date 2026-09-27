@@ -5,6 +5,7 @@ import { useRouter } from 'expo-router';
 import { useEffect, useRef } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { Bounce, FadeScale, PopIn, PressScale, Pulse, ShimmerBar } from '@/components/motion';
 import { NeonText } from '@/components/neon-text';
 import { ScreenFrame } from '@/components/screen-frame';
 import { PARTY_ROUNDS_PER_TEAM, scoreRows } from '@/game/engine';
@@ -106,6 +107,7 @@ export default function GameScreen() {
       <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
         {config.mode === 'party' && team ? (
           <LinearGradient colors={palette.colors} style={styles.teamBanner}>
+            <ShimmerBar />
             <Text style={styles.roundLabel}>
               {roundNumber}/{PARTY_ROUNDS_PER_TEAM}. Tur
             </Text>
@@ -130,13 +132,15 @@ export default function GameScreen() {
               ]}
             />
             {showAnswer ? (
-              <View style={styles.answer}>
-                <Text style={styles.answerText}>{question.answer}</Text>
-              </View>
+              <FadeScale>
+                <View style={styles.answer}>
+                  <Text style={styles.answerText}>{question.answer}</Text>
+                </View>
+              </FadeScale>
             ) : (
-              <Pressable accessibilityRole="button" onPress={revealAnswer} style={styles.reveal}>
+              <PressScale onPress={revealAnswer} style={styles.reveal}>
                 <Text style={styles.revealText}>Cevabı Göster</Text>
-              </Pressable>
+              </PressScale>
             )}
           </View>
         ) : (
@@ -146,48 +150,70 @@ export default function GameScreen() {
         )}
 
         <View style={[styles.actions, paused && styles.dimmed, paused && styles.blocked]}>
-          <Pressable accessibilityRole="button" onPress={() => markAnswer(true)} style={styles.correct}>
+          <PressScale onPress={() => markAnswer(true)} style={styles.correct}>
             <Text style={styles.actionDark}>Doğru</Text>
-          </Pressable>
-          <Pressable accessibilityRole="button" onPress={() => markAnswer(false)} style={styles.wrong}>
+          </PressScale>
+          <PressScale onPress={() => markAnswer(false)} style={styles.wrong}>
             <Text style={styles.actionLight}>Yanlış</Text>
-          </Pressable>
-          <Pressable
-            accessibilityRole="button"
+          </PressScale>
+          <PressScale
             disabled={state.passesLeft <= 0}
             onPress={pass}
-            style={[styles.pass, state.passesLeft <= 0 && styles.disabled]}
+            style={styles.pass}
           >
             <Text style={styles.actionLight}>Pas ({state.passesLeft})</Text>
-          </Pressable>
+          </PressScale>
         </View>
       </ScrollView>
 
       {phase === 'timesUp' ? (
-        <View style={styles.overlay}>
-          <NeonText size={42} color={colors.pink}>
-            Süre doldu
-          </NeonText>
-        </View>
+        <FadeScale style={styles.overlay}>
+          <View style={styles.centerBlock}>
+            <Bounce>
+              <Pulse>
+                <NeonText size={52} color={colors.hard} gradient={[colors.hard, colors.orange, colors.yellow]}>
+                  Süre doldu
+                </NeonText>
+              </Pulse>
+            </Bounce>
+            <View style={styles.dots}>
+              {[0, 1, 2].map((index) => (
+                <Bounce key={index} delay={index * 200}>
+                  <View style={styles.dot} />
+                </Bounce>
+              ))}
+            </View>
+            <Text style={styles.handoffLabel}>Sonuçlar hesaplanıyor</Text>
+          </View>
+        </FadeScale>
       ) : null}
 
       {phase === 'roundTransition' && team ? (
-        <View style={styles.overlay}>
-          <Text style={styles.handoffLabel}>Sıradaki takım</Text>
-          <NeonText size={36}>{config.teams[state.currentTeamIndex]?.name ?? ''}</NeonText>
-        </View>
+        <FadeScale style={styles.overlay}>
+          <View style={styles.centerBlock}>
+            <Pulse>
+              <NeonText size={40} color={colors.turquoise} gradient={[colors.turquoise, colors.lime, colors.yellow]}>
+                Sıradaki takım
+              </NeonText>
+            </Pulse>
+            <Text style={styles.handoffName}>{config.teams[state.currentTeamIndex]?.name ?? ''}</Text>
+          </View>
+        </FadeScale>
       ) : null}
 
       {paused && !exitConfirm ? (
         <Pressable style={styles.overlay} onPress={togglePause}>
-          <NeonText size={36} color={colors.lime}>
-            Duraklatıldı
-          </NeonText>
+          <FadeScale>
+            <NeonText size={36} color={colors.lime}>
+              Duraklatıldı
+            </NeonText>
+          </FadeScale>
         </Pressable>
       ) : null}
 
       {exitConfirm ? (
-        <View style={styles.overlay}>
+        <FadeScale style={styles.overlay}>
+          <PopIn>
           <View style={styles.dialog}>
             <NeonText size={32} color={colors.pink}>
               Geri dön?
@@ -202,7 +228,8 @@ export default function GameScreen() {
               </Pressable>
             </View>
           </View>
-        </View>
+          </PopIn>
+        </FadeScale>
       ) : null}
     </ScreenFrame>
   );
@@ -245,6 +272,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     paddingHorizontal: 12,
     alignItems: 'center',
+    overflow: 'hidden',
   },
   roundLabel: {
     color: colors.black,
@@ -292,6 +320,7 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     paddingVertical: 12,
     paddingHorizontal: 20,
+    overflow: 'hidden',
   },
   revealText: {
     color: colors.white,
@@ -358,11 +387,33 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 24,
   },
+  centerBlock: {
+    alignItems: 'center',
+    gap: 16,
+  },
+  dots: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  dot: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: colors.pink,
+  },
   handoffLabel: {
-    color: colors.textMuted,
+    color: colors.white,
     letterSpacing: 2,
     textTransform: 'uppercase',
-    marginBottom: 8,
+    fontFamily: font.display,
+    fontSize: 20,
+  },
+  handoffName: {
+    color: colors.white,
+    fontFamily: font.display,
+    fontSize: 36,
+    letterSpacing: 1,
+    textAlign: 'center',
   },
   dialog: {
     width: '100%',

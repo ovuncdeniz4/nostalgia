@@ -2,8 +2,9 @@
 
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
+import { Bounce, FadeScale, GlowButton } from '@/components/motion';
 import { NeonText } from '@/components/neon-text';
 import { ScreenFrame } from '@/components/screen-frame';
 import { scoreRows, type ScoreRow } from '@/game/engine';
@@ -53,17 +54,22 @@ export default function ResultsScreen() {
   };
 
   return (
-    <ScreenFrame>
+    <ScreenFrame tone="results">
       <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
-        <NeonText size={48} color={colors.magenta}>
-          Oyun Bitti
-        </NeonText>
+        <FadeScale>
+          <NeonText size={48} color={colors.magenta} gradient={[colors.magenta, colors.turquoise, colors.yellow]}>
+            Oyun Bitti
+          </NeonText>
+        </FadeScale>
         {winner ? (
-          <View style={styles.winner}>
-            <Text style={styles.winnerLabel}>Kazanan</Text>
-            <Text style={styles.winnerName}>{winner.name}</Text>
-            <Text style={styles.winnerScore}>{winner.score} puan</Text>
-          </View>
+          <Bounce>
+            <View style={styles.winner}>
+              <Text style={styles.trophy}>🏆</Text>
+              <Text style={styles.winnerLabel}>Kazanan</Text>
+              <Text style={styles.winnerName}>{winner.name}</Text>
+              <Text style={styles.winnerScore}>{winner.score} puan</Text>
+            </View>
+          </Bounce>
         ) : null}
         <View style={styles.board}>
           <Text style={styles.boardTitle}>Son Puanlar</Text>
@@ -79,12 +85,13 @@ export default function ResultsScreen() {
             );
           })}
         </View>
-        <Pressable accessibilityRole="button" onPress={replay} style={styles.replay}>
-          <Text style={styles.replayText}>Tekrar Oyna</Text>
-        </Pressable>
-        <Pressable accessibilityRole="button" onPress={home} style={styles.home}>
-          <Text style={styles.homeText}>Başa Dön</Text>
-        </Pressable>
+        <GlowButton label="Tekrar Oyna" onPress={replay} />
+        <GlowButton
+          label="Başa Dön"
+          onPress={home}
+          gradient={[colors.turquoise, colors.blue]}
+          textColor={colors.black}
+        />
       </ScrollView>
     </ScreenFrame>
   );
@@ -100,6 +107,11 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     padding: 18,
     alignItems: 'center',
+    borderBottomWidth: 8,
+    borderBottomColor: 'rgba(0,0,0,0.3)',
+  },
+  trophy: {
+    fontSize: 42,
   },
   winnerLabel: {
     color: 'rgba(0,0,0,0.7)',
@@ -162,29 +174,5 @@ const styles = StyleSheet.create({
     color: colors.turquoise,
     fontFamily: font.display,
     fontSize: 24,
-  },
-  replay: {
-    backgroundColor: colors.magenta,
-    borderRadius: 16,
-    paddingVertical: 14,
-  },
-  replayText: {
-    color: colors.white,
-    textAlign: 'center',
-    fontFamily: font.display,
-    letterSpacing: 1,
-    fontSize: 18,
-  },
-  home: {
-    backgroundColor: colors.turquoise,
-    borderRadius: 16,
-    paddingVertical: 14,
-  },
-  homeText: {
-    color: colors.black,
-    textAlign: 'center',
-    fontFamily: font.display,
-    letterSpacing: 1,
-    fontSize: 18,
   },
 });
