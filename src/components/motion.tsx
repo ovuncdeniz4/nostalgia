@@ -152,6 +152,42 @@ export function RetroAtmosphere({ tone = 'play', stars = true }: { tone?: Atmosp
   );
 }
 
+// Reanimated entering animations on web later pin the view with position:absolute,
+// which pulls it out of flow and slides everything underneath upward.
+const webEnter =
+  Platform.OS === 'web'
+    ? StyleSheet.create({
+        fade: {
+          animationDuration: '700ms',
+          animationTimingFunction: 'ease-out',
+          animationFillMode: 'both',
+          animationKeyframes: {
+            from: { opacity: 0, transform: 'scale(0.95)' },
+            to: { opacity: 1, transform: 'scale(1)' },
+          },
+        } as ViewStyle,
+        fadeLate: {
+          animationDuration: '700ms',
+          animationDelay: '400ms',
+          animationTimingFunction: 'ease-out',
+          animationFillMode: 'both',
+          animationKeyframes: {
+            from: { opacity: 0, transform: 'scale(0.95)' },
+            to: { opacity: 1, transform: 'scale(1)' },
+          },
+        } as ViewStyle,
+        pop: {
+          animationDuration: '280ms',
+          animationTimingFunction: 'ease-out',
+          animationFillMode: 'both',
+          animationKeyframes: {
+            from: { opacity: 0, transform: 'scale(0.9)' },
+            to: { opacity: 1, transform: 'scale(1)' },
+          },
+        } as ViewStyle,
+      })
+    : null;
+
 export function FadeScale({
   children,
   delay = 0,
@@ -161,6 +197,9 @@ export function FadeScale({
   delay?: number;
   style?: ViewStyle;
 }) {
+  if (webEnter) {
+    return <View style={[delay > 0 ? webEnter.fadeLate : webEnter.fade, style]}>{children}</View>;
+  }
   return (
     <Animated.View entering={fadeScale(delay)} style={style}>
       {children}
@@ -169,6 +208,9 @@ export function FadeScale({
 }
 
 export function PopIn({ children }: { children: ReactNode }) {
+  if (webEnter) {
+    return <View style={webEnter.pop}>{children}</View>;
+  }
   return <Animated.View entering={popIn}>{children}</Animated.View>;
 }
 
