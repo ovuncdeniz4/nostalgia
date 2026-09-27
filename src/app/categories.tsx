@@ -32,7 +32,7 @@ export default function CategoriesScreen() {
           Kategoriler
         </NeonText>
       </View>
-      <ScrollView contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.list} showsVerticalScrollIndicator={false}>
         {categories.map((category) => (
           <Pressable
             key={category.id}
@@ -41,7 +41,7 @@ export default function CategoriesScreen() {
             onPress={() => setSelected(category)}
             style={styles.card}
           >
-            <Image source={{ uri: category.image }} style={styles.image} />
+            <Image source={category.image} style={styles.image} resizeMode="cover" />
             <View style={styles.cardBody}>
               <Text style={styles.emoji}>{category.emoji}</Text>
               <Text style={styles.cardTitle}>{category.title}</Text>
@@ -53,6 +53,7 @@ export default function CategoriesScreen() {
       {selected ? (
         <View style={styles.modalBackdrop}>
           <View style={styles.modal}>
+            <Image source={selected.image} style={styles.modalImage} resizeMode="cover" />
             <Text style={styles.emojiLarge}>{selected.emoji}</Text>
             <NeonText size={28} color={colors.yellow}>
               {selected.title}
@@ -91,17 +92,21 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
     textTransform: 'uppercase',
   },
+  scroll: {
+    flex: 1,
+    minHeight: 0,
+  },
   list: {
     gap: 14,
     paddingBottom: 24,
   },
   card: {
+    height: 156,
     borderRadius: 18,
     overflow: 'hidden',
     borderWidth: 2,
     borderColor: colors.cardBorder,
     backgroundColor: colors.card,
-    minHeight: 140,
   },
   image: {
     position: 'absolute',
@@ -113,7 +118,7 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   cardBody: {
-    minHeight: 140,
+    flex: 1,
     padding: 16,
     justifyContent: 'flex-end',
     backgroundColor: 'rgba(15,5,29,0.45)',
@@ -140,6 +145,7 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
     left: 0,
+    zIndex: 2,
     backgroundColor: colors.overlay,
     justifyContent: 'flex-end',
     padding: 16,
@@ -151,6 +157,12 @@ const styles = StyleSheet.create({
     borderColor: colors.cardBorder,
     padding: 20,
     gap: 12,
+    overflow: 'hidden',
+  },
+  modalImage: {
+    height: 120,
+    width: '100%',
+    borderRadius: 16,
   },
   emojiLarge: {
     fontSize: 40,

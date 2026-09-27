@@ -133,7 +133,7 @@ export default function SetupScreen() {
           {category.title}
         </NeonText>
       </View>
-      <ScrollView contentContainerStyle={styles.form} showsVerticalScrollIndicator={false}>
+      <ScrollView style={styles.scroll} contentContainerStyle={styles.form} showsVerticalScrollIndicator={false}>
         <Text style={styles.section}>Oyun Modu</Text>
         <View style={styles.row}>
           <Choice label="Tek Kişi" selected={mode === 'solo'} onPress={() => setMode('solo')} />
@@ -183,8 +183,18 @@ export default function SetupScreen() {
         {settingsOpen ? (
           <View style={styles.block}>
             <Text style={styles.label}>Zorluk</Text>
-            <View style={styles.wrap}>
-              {difficulties.map((item) => (
+            <View style={styles.row}>
+              {difficulties.slice(0, 2).map((item) => (
+                <Choice
+                  key={item.id}
+                  label={item.label}
+                  selected={difficulty === item.id}
+                  onPress={() => setDifficulty(item.id)}
+                />
+              ))}
+            </View>
+            <View style={styles.row}>
+              {difficulties.slice(2).map((item) => (
                 <Choice
                   key={item.id}
                   label={item.label}
@@ -194,8 +204,18 @@ export default function SetupScreen() {
               ))}
             </View>
             <Text style={styles.label}>Tur Süresi</Text>
-            <View style={styles.wrap}>
-              {TIMER_OPTIONS.map((seconds) => (
+            <View style={styles.row}>
+              {TIMER_OPTIONS.slice(0, 3).map((seconds) => (
+                <Choice
+                  key={seconds}
+                  label={`${seconds}s`}
+                  selected={roundTimer === seconds}
+                  onPress={() => setRoundTimer(seconds)}
+                />
+              ))}
+            </View>
+            <View style={styles.row}>
+              {TIMER_OPTIONS.slice(3).map((seconds) => (
                 <Choice
                   key={seconds}
                   label={`${seconds}s`}
@@ -224,17 +244,17 @@ export default function SetupScreen() {
             </View>
           </View>
         ) : null}
+        <Pressable
+          accessibilityRole="button"
+          disabled={!ready}
+          onPress={() => setCountdown(3)}
+          style={[styles.primary, !ready && styles.disabled]}
+        >
+          <Text style={styles.primaryText}>
+            {countdown !== null && countdown > 0 ? `${countdown}... içinde başlıyor` : 'Oyunu Başlat'}
+          </Text>
+        </Pressable>
       </ScrollView>
-      <Pressable
-        accessibilityRole="button"
-        disabled={!ready}
-        onPress={() => setCountdown(3)}
-        style={[styles.primary, !ready && styles.disabled]}
-      >
-        <Text style={styles.primaryText}>
-          {countdown !== null && countdown > 0 ? `${countdown}... içinde başlıyor` : 'Oyunu Başlat'}
-        </Text>
-      </Pressable>
     </ScreenFrame>
   );
 }
@@ -276,9 +296,14 @@ const styles = StyleSheet.create({
   emoji: {
     fontSize: 36,
   },
+  scroll: {
+    flex: 1,
+    minHeight: 0,
+  },
   form: {
+    flexGrow: 1,
     gap: 12,
-    paddingBottom: 16,
+    paddingBottom: 8,
   },
   section: {
     color: colors.yellow,
@@ -296,25 +321,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 8,
   },
-  wrap: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 8,
-  },
   choice: {
-    flexGrow: 1,
-    minWidth: '40%',
+    flex: 1,
+    flexBasis: 0,
     backgroundColor: colors.cardStrong,
     borderRadius: 14,
     paddingVertical: 14,
-    paddingHorizontal: 10,
+    paddingHorizontal: 8,
     borderWidth: 2,
     borderColor: 'transparent',
   },
   choiceOn: {
     backgroundColor: colors.turquoise,
     borderColor: 'rgba(255,255,255,0.35)',
-    transform: [{ translateY: -2 }],
   },
   choiceText: {
     color: colors.white,
@@ -400,7 +419,7 @@ const styles = StyleSheet.create({
     backgroundColor: colors.lime,
     borderRadius: 18,
     paddingVertical: 16,
-    marginTop: 8,
+    marginTop: 'auto',
   },
   disabled: {
     opacity: 0.45,
