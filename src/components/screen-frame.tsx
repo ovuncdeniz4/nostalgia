@@ -20,10 +20,12 @@ export const webScrollStyle: ViewStyle | null =
     ? ({
         touchAction: 'pan-y',
         overscrollBehaviorX: 'none',
+        overflowAnchor: 'none',
         transform: 'none',
       } as unknown as ViewStyle)
     : null;
 
+// The frame fills the navigator card. Pinning it to the viewport made the whole screen slide on tap.
 export function ScreenFrame({ children, tone = 'play' }: ScreenFrameProps) {
   return (
     <View style={styles.root}>
@@ -43,7 +45,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     ...(Platform.OS === 'web'
       ? ({
-          position: 'fixed',
+          position: 'absolute',
           top: 0,
           right: 0,
           bottom: 0,

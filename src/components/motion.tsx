@@ -73,6 +73,7 @@ function PulseOrb({
     <Animated.View
       style={[
         styles.ignore,
+        styles.orb,
         {
           width: size,
           height: size,
@@ -351,9 +352,13 @@ const styles = StyleSheet.create({
   ignore: {
     pointerEvents: 'none',
   },
+  orb: {
+    position: 'absolute',
+  },
   centerOrb: {
     top: '28%',
-    alignSelf: 'center',
+    left: '50%',
+    marginLeft: -180,
   },
   star: {
     position: 'absolute',

@@ -21,6 +21,20 @@ export default function RootLayout() {
     }
   }, [ready]);
 
+  useEffect(() => {
+    if (Platform.OS !== 'web' || typeof document === 'undefined') {
+      return;
+    }
+    const id = 'nostalgia-shell';
+    if (document.getElementById(id)) {
+      return;
+    }
+    const node = document.createElement('style');
+    node.id = id;
+    node.textContent = 'html,body,#root{height:100%;width:100%;margin:0;overflow:hidden;overscroll-behavior:none;}';
+    document.head.appendChild(node);
+  }, []);
+
   if (!ready) {
     return null;
   }
