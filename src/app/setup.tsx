@@ -3,7 +3,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
-import { Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, ViewStyle } from 'react-native';
+import { Platform, Pressable, ScrollView, StyleSheet, Text, TextInput, View, ViewStyle, type TextStyle } from 'react-native';
 
 import { GlowButton, Pulse, ShimmerBar } from '@/components/motion';
 import { NeonText } from '@/components/neon-text';
@@ -106,7 +106,8 @@ export default function SetupScreen() {
     );
   }
 
-  const ready = canStartGame(mode, teams) && countdown === null;
+  const canStart = canStartGame(mode, teams);
+  const counting = countdown !== null && countdown > 0;
   const namedTeams = teams.filter((team) => team.name.trim().length > 0).length;
 
   const updateTeam = (id: number, name: string) => {
@@ -308,20 +309,20 @@ export default function SetupScreen() {
         </Fold>
 
         <GlowButton
-          label={countdown !== null && countdown > 0 ? `${countdown}... içinde başlıyor` : 'Oyunu Başlat'}
-          leading={ready ? '▶' : undefined}
-          trailing={ready ? '🏆' : undefined}
-          disabled={!ready}
+          label="Oyunu Başlat"
+          leading={canStart ? '▶' : undefined}
+          trailing={canStart ? '🏆' : undefined}
+          disabled={!canStart || counting}
           onPress={() => setCountdown(3)}
-          gradient={ready ? [colors.lime, colors.turquoise] : [colors.cardStrong, colors.cardStrong]}
-          textColor={ready ? colors.black : colors.textMuted}
+          gradient={canStart ? [colors.lime, colors.turquoise] : [colors.cardStrong, colors.cardStrong]}
+          textColor={canStart ? colors.black : colors.textMuted}
           style={styles.start}
         />
       </ScrollView>
-      {countdown !== null && countdown > 0 ? (
+      {counting ? (
         <View style={styles.countdown}>
           <Pulse key={countdown}>
-            <NeonText size={96} color={colors.yellow} gradient={[colors.yellow, colors.pink, colors.turquoise]}>
+            <NeonText size={120} color={colors.yellow} style={styles.countdownDigit}>
               {String(countdown)}
             </NeonText>
           </Pulse>
@@ -823,7 +824,15 @@ const styles = StyleSheet.create({
     left: 0,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.72)',
-    pointerEvents: 'none',
+    backgroundColor: 'rgba(6, 2, 16, 0.92)',
   },
+  countdownDigit: Platform.OS === 'web'
+    ? ({
+        textShadow: '0 0 28px #FFD93B, 0 6px 0 rgba(0,0,0,0.9)',
+      } as TextStyle)
+    : {
+        textShadowColor: '#FFD93B',
+        textShadowOffset: { width: 0, height: 0 },
+        textShadowRadius: 28,
+      },
 });
