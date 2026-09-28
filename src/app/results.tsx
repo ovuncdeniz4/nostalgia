@@ -128,7 +128,7 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   board: {
-    backgroundColor: colors.card,
+    backgroundColor: colors.surface,
     borderRadius: 24,
     borderWidth: 2,
     borderColor: colors.cardBorder,
@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: colors.surfaceRaised,
     borderRadius: 16,
     padding: 12,
   },

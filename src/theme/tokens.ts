@@ -18,9 +18,23 @@ export const colors = {
   card: 'rgba(255,255,255,0.05)',
   cardStrong: 'rgba(255,255,255,0.08)',
   cardBorder: 'rgba(255,255,255,0.1)',
+  // Opaque panels. Glass fills let the background orbs read as if they sit on the controls.
+  surface: '#221336',
+  surfaceRaised: '#2d1a4a',
   textMuted: 'rgba(255,255,255,0.65)',
   overlay: 'rgba(0,0,0,0.72)',
 };
+
+// Mix a neon accent into the opaque surface so a selected tile stays solid.
+export function tintSurface(hex: string, amount = 0.34): string {
+  const clean = hex.replace('#', '');
+  const channel = (start: number, base: number) => {
+    const value = parseInt(clean.slice(start, start + 2), 16);
+    return Math.round(value * amount + base * (1 - amount));
+  };
+  const mixed = [channel(0, 0x22), channel(2, 0x13), channel(4, 0x36)];
+  return `#${mixed.map((part) => part.toString(16).padStart(2, '0')).join('')}`;
+}
 
 export const font = {
   display: 'Anton_400Regular',

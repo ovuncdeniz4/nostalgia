@@ -20,7 +20,7 @@ import {
 } from '@/game/engine';
 import { useSession } from '@/game/session';
 import { loadPrefs, savePrefs } from '@/storage/prefs';
-import { colors, font } from '@/theme/tokens';
+import { colors, font, tintSurface } from '@/theme/tokens';
 
 const webClip = Platform.OS === 'web' ? ({ overflow: 'clip' } as unknown as ViewStyle) : null;
 
@@ -139,7 +139,7 @@ export default function SetupScreen() {
         showsVerticalScrollIndicator={false}
       >
         <LinearGradient
-          colors={['rgba(255,0,255,0.18)', 'rgba(0,217,255,0.18)']}
+          colors={[tintSurface(colors.magenta, 0.34), tintSurface(colors.turquoise, 0.28)]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.categoryCard}
@@ -499,7 +499,7 @@ function Choice({
         style={[
           styles.choice,
           selected && !calmSelected && styles.choiceOn,
-          calmSelected && accent ? { borderColor: accent, backgroundColor: `${accent}33` } : null,
+          calmSelected && accent ? { borderColor: accent, backgroundColor: tintSurface(accent, 0.28) } : null,
           webClip,
         ]}
       >
@@ -554,7 +554,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    backgroundColor: '#14081f',
   },
   emoji: {
     fontSize: 36,
@@ -588,7 +588,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   panel: {
-    backgroundColor: 'rgba(255,255,255,0.05)',
+    backgroundColor: colors.surface,
     borderWidth: 2,
     borderColor: 'rgba(255,255,255,0.1)',
     borderRadius: 18,
@@ -607,7 +607,7 @@ const styles = StyleSheet.create({
     width: '100%',
     borderRadius: 14,
     overflow: 'hidden',
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: colors.surfaceRaised,
     borderWidth: 2,
     borderColor: 'transparent',
     borderBottomWidth: 4,
@@ -653,7 +653,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: 8,
-    backgroundColor: 'rgba(255,255,255,0.05)',
+    backgroundColor: colors.surface,
     borderWidth: 2,
     borderColor: 'rgba(255,255,255,0.1)',
     borderRadius: 18,
@@ -680,7 +680,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: colors.surfaceRaised,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.18)',
   },
@@ -703,7 +703,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
-    backgroundColor: 'rgba(255,255,255,0.05)',
+    backgroundColor: colors.surface,
     borderWidth: 2,
     borderColor: 'rgba(255,255,255,0.1)',
     borderRadius: 16,
@@ -724,7 +724,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     color: colors.white,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    backgroundColor: colors.surfaceRaised,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.2)',

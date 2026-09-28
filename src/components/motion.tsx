@@ -35,17 +35,20 @@ function webSoftOrb(color: string, blur: number): ViewStyle | null {
   const r = parseInt(hex.slice(0, 2), 16);
   const g = parseInt(hex.slice(2, 4), 16);
   const b = parseInt(hex.slice(4, 6), 16);
-  const edge = Math.max(62, Math.min(78, 90 - blur / 8));
+  const edge = Math.max(58, Math.min(72, 84 - blur / 10));
   return {
     backgroundColor: 'transparent',
-    backgroundImage: `radial-gradient(circle, rgba(${r},${g},${b},0.85) 0%, rgba(${r},${g},${b},0.28) 42%, transparent ${edge}%)`,
+    backgroundImage: `radial-gradient(circle, rgba(${r},${g},${b},0.42) 0%, rgba(${r},${g},${b},0.12) 36%, transparent ${edge}%)`,
   } as ViewStyle;
 }
 
 // Blur and the pulse transform each make a stacking context. Without a parent
 // context, Safari paints those orbs above later siblings while the scale changes.
+// translateZ keeps Safari from promoting a pulsing orb above the controls.
 const webAtmosphere =
-  Platform.OS === 'web' ? ({ isolation: 'isolate', zIndex: 0 } as unknown as ViewStyle) : null;
+  Platform.OS === 'web'
+    ? ({ isolation: 'isolate', zIndex: 0, transform: 'translateZ(0)' } as unknown as ViewStyle)
+    : null;
 
 function fadeScale(delay: number) {
   return new Keyframe({
@@ -84,8 +87,8 @@ function PulseOrb({
   }, [delay, shift]);
 
   const animated = useAnimatedStyle(() => ({
-    opacity: 0.16 + shift.value * 0.18,
-    transform: [{ scale: 1 + shift.value * 0.1 }],
+    opacity: 0.22 + shift.value * 0.2,
+    transform: [{ scale: 1 + shift.value * 0.08 }],
   }));
 
   return (
@@ -129,20 +132,20 @@ export function RetroAtmosphere({ tone = 'play', stars = true }: { tone?: Atmosp
   }[] =
     tone === 'results'
       ? [
-          { color: colors.yellow, delay: 0, size: 180, blur: 80, style: { top: '18%', left: '8%' } },
-          { color: colors.magenta, delay: 500, size: 180, blur: 80, style: { top: '28%', right: '6%' } },
-          { color: colors.turquoise, delay: 1000, size: 180, blur: 80, style: { bottom: '18%', left: '22%' } },
+          { color: colors.yellow, delay: 0, size: 220, blur: 110, style: { top: -50, left: -130 } },
+          { color: colors.magenta, delay: 500, size: 220, blur: 110, style: { top: 40, right: -150 } },
+          { color: colors.turquoise, delay: 1000, size: 200, blur: 100, style: { bottom: -70, left: -90 } },
         ]
       : tone === 'welcome'
         ? [
-            { color: colors.magenta, delay: 0, size: 240, blur: 100, style: { top: 40, left: -80 } },
-            { color: colors.turquoise, delay: 1000, size: 300, blur: 120, style: { bottom: 40, right: -100 } },
-            { color: colors.purple, delay: 500, size: 360, blur: 140, style: styles.centerOrb },
+            { color: colors.magenta, delay: 0, size: 240, blur: 110, style: { top: -20, left: -140 } },
+            { color: colors.turquoise, delay: 1000, size: 280, blur: 120, style: { bottom: -20, right: -150 } },
+            { color: colors.purple, delay: 500, size: 280, blur: 130, style: styles.centerOrb },
           ]
         : [
-            { color: colors.purple, delay: 0, size: 240, blur: 100, style: { top: 40, left: -80 } },
-            { color: colors.pink, delay: 1000, size: 300, blur: 120, style: { bottom: 80, right: -100 } },
-            { color: colors.turquoise, delay: 500, size: 160, blur: 80, style: { top: '34%', right: 24 } },
+            { color: colors.purple, delay: 0, size: 260, blur: 110, style: { top: -30, left: -150 } },
+            { color: colors.pink, delay: 1000, size: 240, blur: 110, style: { bottom: -70, right: -160 } },
+            { color: colors.turquoise, delay: 500, size: 200, blur: 100, style: { top: '46%', left: -150 } },
           ];
 
   return (
@@ -421,9 +424,9 @@ const styles = StyleSheet.create({
     zIndex: 0,
   },
   centerOrb: {
-    top: '28%',
+    top: '18%',
     left: '50%',
-    marginLeft: -180,
+    marginLeft: -140,
   },
   star: {
     position: 'absolute',

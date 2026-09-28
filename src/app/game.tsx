@@ -11,7 +11,7 @@ import { ScreenFrame, webScrollStyle } from '@/components/screen-frame';
 import { PARTY_ROUNDS_PER_TEAM, scoreRows } from '@/game/engine';
 import { useSession } from '@/game/session';
 import { saveLastResult } from '@/storage/prefs';
-import { colors, font, teamPalettes } from '@/theme/tokens';
+import { colors, font, teamPalettes, tintSurface } from '@/theme/tokens';
 
 export default function GameScreen() {
   const router = useRouter();
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 14,
     borderWidth: 2,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: '#12081f',
     alignItems: 'center',
   },
   timerText: {
@@ -290,7 +290,7 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     borderWidth: 2,
     borderColor: 'rgba(255,255,255,0.2)',
-    backgroundColor: 'rgba(255,0,255,0.12)',
+    backgroundColor: tintSurface(colors.magenta, 0.22),
     padding: 20,
     gap: 18,
     minHeight: 240,
