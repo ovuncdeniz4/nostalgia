@@ -59,6 +59,8 @@ const styles = StyleSheet.create({
     flex: 1,
     minHeight: 0,
     overflow: 'hidden',
+    zIndex: 1,
+    ...(Platform.OS === 'web' ? ({ isolation: 'isolate' } as unknown as ViewStyle) : null),
   },
   column: {
     flex: 1,

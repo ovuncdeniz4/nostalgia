@@ -23,10 +23,29 @@ const GRAIN =
 
 type AtmosphereTone = 'welcome' | 'play' | 'results';
 
-const webBlur = (radius: number): ViewStyle | null =>
-  Platform.OS === 'web' ? ({ filter: `blur(${radius}px)` } as ViewStyle) : null;
-
 const webClip = Platform.OS === 'web' ? ({ overflow: 'clip' } as unknown as ViewStyle) : null;
+
+// A CSS blur filter is what made Safari lift the orbs above the controls.
+// A radial gradient stays soft without creating that compositing layer.
+function webSoftOrb(color: string, blur: number): ViewStyle | null {
+  if (Platform.OS !== 'web') {
+    return null;
+  }
+  const hex = color.replace('#', '');
+  const r = parseInt(hex.slice(0, 2), 16);
+  const g = parseInt(hex.slice(2, 4), 16);
+  const b = parseInt(hex.slice(4, 6), 16);
+  const edge = Math.max(62, Math.min(78, 90 - blur / 8));
+  return {
+    backgroundColor: 'transparent',
+    backgroundImage: `radial-gradient(circle, rgba(${r},${g},${b},0.85) 0%, rgba(${r},${g},${b},0.28) 42%, transparent ${edge}%)`,
+  } as ViewStyle;
+}
+
+// Blur and the pulse transform each make a stacking context. Without a parent
+// context, Safari paints those orbs above later siblings while the scale changes.
+const webAtmosphere =
+  Platform.OS === 'web' ? ({ isolation: 'isolate', zIndex: 0 } as unknown as ViewStyle) : null;
 
 function fadeScale(delay: number) {
   return new Keyframe({
@@ -80,7 +99,7 @@ function PulseOrb({
           borderRadius: size / 2,
           backgroundColor: color,
         },
-        webBlur(blur),
+        webSoftOrb(color, blur),
         style,
         animated,
       ]}
@@ -127,7 +146,7 @@ export function RetroAtmosphere({ tone = 'play', stars = true }: { tone?: Atmosp
           ];
 
   return (
-    <View style={[StyleSheet.absoluteFill, styles.ignore, styles.clip, webClip]}>
+    <View style={[StyleSheet.absoluteFill, styles.ignore, styles.atmosphere, styles.clip, webClip, webAtmosphere]}>
       {orbs.map((orb) => (
         <PulseOrb key={`${orb.color}-${orb.delay}`} {...orb} />
       ))}
@@ -394,8 +413,12 @@ const styles = StyleSheet.create({
   ignore: {
     pointerEvents: 'none',
   },
+  atmosphere: {
+    zIndex: 0,
+  },
   orb: {
     position: 'absolute',
+    zIndex: 0,
   },
   centerOrb: {
     top: '28%',
