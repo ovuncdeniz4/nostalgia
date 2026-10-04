@@ -3,7 +3,7 @@
 import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { useEffect, useRef } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { BackHandler, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 import { Bounce, FadeScale, PopIn, PressScale, Pulse, ShimmerBar } from '@/components/motion';
 import { NeonText } from '@/components/neon-text';
@@ -45,6 +45,26 @@ export default function GameScreen() {
     const timer = setInterval(() => tick(), 1000);
     return () => clearInterval(timer);
   }, [phase, tick]);
+
+  // Android back and iOS-style leave: always confirm before discarding the round.
+  useEffect(() => {
+    if (Platform.OS === 'web') {
+      return;
+    }
+    const onBack = () => {
+      if (exitConfirm) {
+        cancelExit();
+        return true;
+      }
+      if (phase === 'playing' || phase === 'paused') {
+        requestExit();
+        return true;
+      }
+      return false;
+    };
+    const sub = BackHandler.addEventListener('hardwareBackPress', onBack);
+    return () => sub.remove();
+  }, [cancelExit, exitConfirm, phase, requestExit]);
 
   useEffect(() => {
     if (phase !== 'roundTransition') {
@@ -91,20 +111,22 @@ export default function GameScreen() {
   };
 
   return (
-    <ScreenFrame>
-      <View style={styles.top}>
-        <Pressable accessibilityRole="button" accessibilityLabel="Duraklat" onPress={togglePause}>
-          <Text style={styles.icon}>{paused ? '▶' : '⏸'}</Text>
-        </Pressable>
-        <View style={[styles.timer, { borderColor: timerColor }]}>
-          <Text style={[styles.timerText, { color: timerColor }]}>{state.timeRemaining}s</Text>
+    <ScreenFrame stars={false}>
+      <View style={styles.root}>
+        <View style={styles.top}>
+          <Pressable accessibilityRole="button" accessibilityLabel="Duraklat" onPress={togglePause} style={styles.topHit}>
+            <Text style={styles.icon}>{paused ? '▶' : '⏸'}</Text>
+          </Pressable>
+          <View style={[styles.timer, { borderColor: timerColor }]}>
+            <Text style={[styles.timerText, { color: timerColor }]}>{state.timeRemaining}s</Text>
+          </View>
+          <Pressable accessibilityRole="button" accessibilityLabel="Oyundan çık" onPress={requestExit} style={styles.exitHit}>
+            <Text style={styles.exitGlyph}>✕</Text>
+            <Text style={styles.exitLabel}>Çık</Text>
+          </Pressable>
         </View>
-        <Pressable accessibilityRole="button" accessibilityLabel="Çık" onPress={requestExit}>
-          <Text style={[styles.icon, styles.exitIcon]}>✕</Text>
-        </Pressable>
-      </View>
 
-      <ScrollView style={webScrollStyle} contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
+        <ScrollView style={webScrollStyle} contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
         {config.mode === 'party' && team ? (
           <LinearGradient colors={palette.colors} style={styles.teamBanner}>
             <ShimmerBar />
@@ -164,10 +186,10 @@ export default function GameScreen() {
             <Text style={styles.actionLight}>Pas ({state.passesLeft})</Text>
           </PressScale>
         </View>
-      </ScrollView>
+        </ScrollView>
 
       {phase === 'timesUp' ? (
-        <FadeScale style={styles.overlay}>
+        <FadeScale style={styles.overlayFull}>
           <View style={styles.centerBlock}>
             <Bounce>
               <Pulse>
@@ -189,7 +211,7 @@ export default function GameScreen() {
       ) : null}
 
       {phase === 'roundTransition' && team ? (
-        <FadeScale style={styles.overlay}>
+        <FadeScale style={styles.overlayFull}>
           <View style={styles.centerBlock}>
             <Pulse>
               <NeonText size={40} color={colors.turquoise} gradient={[colors.turquoise, colors.lime, colors.yellow]}>
@@ -202,53 +224,95 @@ export default function GameScreen() {
       ) : null}
 
       {paused && !exitConfirm ? (
-        <Pressable style={styles.overlay} onPress={togglePause}>
-          <FadeScale>
+        <View style={styles.overlayFull} pointerEvents="box-none">
+          <FadeScale style={styles.pauseCard}>
             <NeonText size={36} color={colors.lime}>
               Duraklatıldı
             </NeonText>
+            <View style={styles.pauseActions}>
+              <Pressable accessibilityRole="button" onPress={togglePause} style={styles.pausePrimary}>
+                <Text style={styles.actionDark}>Devam</Text>
+              </Pressable>
+              <Pressable accessibilityRole="button" onPress={requestExit} style={styles.pauseDanger}>
+                <Text style={styles.actionLight}>Oyundan çık</Text>
+              </Pressable>
+            </View>
           </FadeScale>
-        </Pressable>
+        </View>
       ) : null}
 
       {exitConfirm ? (
-        <FadeScale style={styles.overlay}>
-          <PopIn>
-          <View style={styles.dialog}>
-            <NeonText size={32} color={colors.pink}>
-              Geri dön?
-            </NeonText>
-            <Text style={styles.dialogCopy}>İlerlemeniz kaybolacak</Text>
-            <View style={styles.dialogActions}>
-              <Pressable accessibilityRole="button" onPress={cancelExit} style={styles.stay}>
-                <Text style={styles.actionDark}>Kal</Text>
-              </Pressable>
-              <Pressable accessibilityRole="button" onPress={leave} style={styles.leave}>
-                <Text style={styles.actionLight}>Çık</Text>
-              </Pressable>
-            </View>
-          </View>
-          </PopIn>
-        </FadeScale>
+        <View style={styles.overlayFull} pointerEvents="auto">
+          <FadeScale style={styles.pauseCard}>
+            <PopIn>
+              <View style={styles.dialog}>
+                <NeonText size={32} color={colors.pink}>
+                  Oyundan çık?
+                </NeonText>
+                <Text style={styles.dialogCopy}>Tur ilerlemen kaybolur. Kurulum ekranına dönersin.</Text>
+                <View style={styles.dialogActions}>
+                  <Pressable accessibilityRole="button" onPress={cancelExit} style={styles.stay}>
+                    <Text style={styles.actionDark}>Kal</Text>
+                  </Pressable>
+                  <Pressable accessibilityRole="button" onPress={leave} style={styles.leave}>
+                    <Text style={styles.actionLight}>Çık</Text>
+                  </Pressable>
+                </View>
+              </View>
+            </PopIn>
+          </FadeScale>
+        </View>
       ) : null}
+      </View>
     </ScreenFrame>
   );
 }
 
 const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+    minHeight: 0,
+  },
   top: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 12,
+    zIndex: 20,
+  },
+  topHit: {
+    minWidth: 44,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   icon: {
     color: colors.turquoise,
     fontSize: 22,
     padding: 8,
   },
-  exitIcon: {
+  exitHit: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    minHeight: 44,
+    paddingHorizontal: 10,
+    borderRadius: 14,
+    borderWidth: 2,
+    borderColor: 'rgba(255,255,255,0.25)',
+    backgroundColor: 'rgba(255,20,147,0.22)',
+  },
+  exitGlyph: {
     color: colors.pink,
+    fontSize: 16,
+    fontFamily: font.display,
+  },
+  exitLabel: {
+    color: colors.white,
+    fontFamily: font.display,
+    fontSize: 14,
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
   },
   timer: {
     minWidth: 88,
@@ -386,6 +450,38 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 24,
+  },
+  overlayFull: {
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    zIndex: 100,
+    backgroundColor: 'rgba(0,0,0,0.78)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 24,
+  },
+  pauseCard: {
+    width: '100%',
+    maxWidth: 360,
+    alignItems: 'center',
+    gap: 20,
+  },
+  pauseActions: {
+    width: '100%',
+    gap: 10,
+  },
+  pausePrimary: {
+    backgroundColor: colors.lime,
+    borderRadius: 14,
+    paddingVertical: 14,
+  },
+  pauseDanger: {
+    backgroundColor: colors.hard,
+    borderRadius: 14,
+    paddingVertical: 14,
   },
   centerBlock: {
     alignItems: 'center',
